@@ -14,7 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      controle_entregas: {
+        Row: {
+          carro: string | null
+          cliente: string | null
+          created_at: string
+          data_montagem: string | null
+          data_saida: string | null
+          descricao_erros: string | null
+          erros: string | null
+          gastos_entrega: number | null
+          gastos_montagem: number | null
+          id: string
+          montador_1: string | null
+          montador_2: string | null
+          motorista: string | null
+          nf: string | null
+          percentual_gastos: number | null
+          precisa_montagem: boolean | null
+          produtividade: number | null
+          pv_foco: string | null
+          status: string | null
+          tipo_transporte: string | null
+          uf: string | null
+          updated_at: string
+          valor: number | null
+        }
+        Insert: {
+          carro?: string | null
+          cliente?: string | null
+          created_at?: string
+          data_montagem?: string | null
+          data_saida?: string | null
+          descricao_erros?: string | null
+          erros?: string | null
+          gastos_entrega?: number | null
+          gastos_montagem?: number | null
+          id?: string
+          montador_1?: string | null
+          montador_2?: string | null
+          motorista?: string | null
+          nf?: string | null
+          percentual_gastos?: number | null
+          precisa_montagem?: boolean | null
+          produtividade?: number | null
+          pv_foco?: string | null
+          status?: string | null
+          tipo_transporte?: string | null
+          uf?: string | null
+          updated_at?: string
+          valor?: number | null
+        }
+        Update: {
+          carro?: string | null
+          cliente?: string | null
+          created_at?: string
+          data_montagem?: string | null
+          data_saida?: string | null
+          descricao_erros?: string | null
+          erros?: string | null
+          gastos_entrega?: number | null
+          gastos_montagem?: number | null
+          id?: string
+          montador_1?: string | null
+          montador_2?: string | null
+          motorista?: string | null
+          nf?: string | null
+          percentual_gastos?: number | null
+          precisa_montagem?: boolean | null
+          produtividade?: number | null
+          pv_foco?: string | null
+          status?: string | null
+          tipo_transporte?: string | null
+          uf?: string | null
+          updated_at?: string
+          valor?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
