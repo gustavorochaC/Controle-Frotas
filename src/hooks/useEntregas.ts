@@ -22,7 +22,7 @@ export function useCreateEntrega() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (entrega: EntregaFormData) => {
+    mutationFn: async (entrega: Partial<EntregaFormData>) => {
       const { data, error } = await supabase
         .from('controle_entregas')
         .insert([entrega])
@@ -39,13 +39,12 @@ export function useCreateEntrega() {
         description: 'Entrega cadastrada com sucesso.',
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: 'Erro',
         description: 'Falha ao cadastrar entrega.',
         variant: 'destructive',
       });
-      console.error('Error creating entrega:', error);
     }
   });
 }
@@ -72,13 +71,12 @@ export function useUpdateEntrega() {
         description: 'Entrega atualizada com sucesso.',
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: 'Erro',
         description: 'Falha ao atualizar entrega.',
         variant: 'destructive',
       });
-      console.error('Error updating entrega:', error);
     }
   });
 }
@@ -102,13 +100,12 @@ export function useDeleteEntrega() {
         description: 'Entrega excluída com sucesso.',
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: 'Erro',
         description: 'Falha ao excluir entrega.',
         variant: 'destructive',
       });
-      console.error('Error deleting entrega:', error);
     }
   });
 }

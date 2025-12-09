@@ -1,0 +1,283 @@
+import { useState, useMemo } from 'react';
+import { Plus, Fuel, Gauge, Search, Printer } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { AbastecimentoTable } from '@/components/abastecimento/AbastecimentoTable';
+import { AbastecimentoFormModal } from '@/components/abastecimento/AbastecimentoFormModal';
+import { DeleteConfirmDialog } from '@/components/dashboard/DeleteConfirmDialog';
+import { TablePrintModal, TableColumn } from '@/components/shared/TablePrintModal';
+import { ModuleLayout } from '@/components/layout/ModuleLayout';
+import { format } from 'date-fns';
+import { 
+  useAbastecimentos, 
+  useCreateAbastecimento, 
+  useUpdateAbastecimento, 
+  useDeleteAbastecimento 
+} from '@/hooks/useAbastecimentos';
+import type { Abastecimento as AbastecimentoType, AbastecimentoFormData } from '@/types/abastecimento';
+
+const AbastecimentoPage = () => {
+  const { data: abastecimentos = [], isLoading } = useAbastecimentos();
+  const createAbastecimento = useCreateAbastecimento();
+  const updateAbastecimento = useUpdateAbastecimento();
+  const deleteAbastecimento = useDeleteAbastecimento();
+
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedAbastecimento, setSelectedAbastecimento] = useState<AbastecimentoType | null>(null);
+  const [searchPlaca, setSearchPlaca] = useState('');
+  
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [abastecimentoToDelete, setAbastecimentoToDelete] = useState<AbastecimentoType | null>(null);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+
+  const handleOpenForm = (abastecimento?: AbastecimentoType) => {
+    setSelectedAbastecimento(abastecimento || null);
+    setIsFormOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    setSelectedAbastecimento(null);
+  };
+
+  const handleSubmit = (data: AbastecimentoFormData) => {
+    if (selectedAbastecimento) {
+      updateAbastecimento.mutate(
+        { id: selectedAbastecimento.id, data },
+        { onSuccess: handleCloseForm }
+      );
+    } else {
+      createAbastecimento.mutate(data, { onSuccess: handleCloseForm });
+    }
+  };
+
+  const handleOpenDeleteDialog = (abastecimento: AbastecimentoType) => {
+    setAbastecimentoToDelete(abastecimento);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (abastecimentoToDelete) {
+      deleteAbastecimento.mutate(abastecimentoToDelete.id, {
+        onSuccess: () => {
+          setIsDeleteDialogOpen(false);
+          setAbastecimentoToDelete(null);
+        }
+      });
+    }
+  };
+
+  // Filtrar abastecimentos por placa
+  const filteredAbastecimentos = useMemo(() => {
+    if (!searchPlaca.trim()) return abastecimentos;
+    return abastecimentos.filter(a => 
+      a.veiculo_placa?.toLowerCase().includes(searchPlaca.toLowerCase())
+    );
+  }, [abastecimentos, searchPlaca]);
+
+  // Calcular totais
+  const totalLitros = abastecimentos.reduce((acc, a) => acc + (a.litros || 0), 0);
+  const totalValor = abastecimentos.reduce((acc, a) => acc + (a.valor_total || 0), 0);
+  
+  // Calcular média de consumo (KM/L) - apenas registros com valor válido
+  const abastecimentosComKmPorLitro = abastecimentos.filter(a => a.km_por_litro != null && a.km_por_litro > 0);
+  const mediaConsumo = abastecimentosComKmPorLitro.length > 0
+    ? abastecimentosComKmPorLitro.reduce((acc, a) => acc + (a.km_por_litro || 0), 0) / abastecimentosComKmPorLitro.length
+    : 0;
+
+  // Configuração de colunas para impressão
+  const printColumns: TableColumn<AbastecimentoType>[] = useMemo(() => [
+    { 
+      key: 'data', 
+      label: 'Data',
+      render: (value) => value ? format(new Date(value), 'dd/MM/yyyy') : '-'
+    },
+    { key: 'veiculo_placa', label: 'Veículo' },
+    { key: 'condutor_nome', label: 'Condutor' },
+    { key: 'posto', label: 'Posto/Manutenção' },
+    { 
+      key: 'cidade', 
+      label: 'Cidade',
+      render: (value, row) => row.cidade && row.estado ? `${row.cidade} - ${row.estado}` : '-'
+    },
+    { 
+      key: 'km_inicial', 
+      label: 'Km Inicial',
+      render: (value) => value ? value.toLocaleString('pt-BR') : '0'
+    },
+    { 
+      key: 'litros', 
+      label: 'Litros',
+      render: (value) => value ? value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0'
+    },
+    { 
+      key: 'km_por_litro', 
+      label: 'KM/L',
+      render: (value) => value ? `${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} km/l` : 'N/A'
+    },
+    { key: 'produto', label: 'Produto' },
+    { 
+      key: 'valor_unitario', 
+      label: 'Valor Un.',
+      render: (value) => value ? `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'R$ 0,00',
+      className: 'text-right'
+    },
+    { 
+      key: 'valor_total', 
+      label: 'Valor Total',
+      render: (value) => value ? `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'R$ 0,00',
+      className: 'text-right font-semibold'
+    },
+  ], []);
+
+  // Texto descritivo dos filtros aplicados
+  const filtersText = useMemo(() => {
+    if (searchPlaca.trim()) {
+      return `Busca por placa: "${searchPlaca}"`;
+    }
+    return 'Todos os registros';
+  }, [searchPlaca]);
+
+  return (
+    <ModuleLayout>
+      <div className="p-8 lg:p-10 space-y-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Controle de Abastecimento</h2>
+            <p className="text-slate-500 mt-1">Controle de abastecimentos e consumo</p>
+          </div>
+          <Button onClick={() => handleOpenForm()} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Novo Abastecimento
+          </Button>
+        </div>
+
+        <div className="space-y-6">
+          {/* Cards de resumo */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card className="bg-card border-border shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total de Registros
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold text-foreground">{abastecimentos.length}</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-card border-border shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total de Litros
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold text-foreground">
+                  {totalLitros.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} L
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-card border-border shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Gauge className="h-4 w-4" />
+                  Média de Consumo
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold text-blue-500">
+                  {mediaConsumo > 0 
+                    ? `${mediaConsumo.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} km/l`
+                    : 'N/A'}
+                </p>
+                {abastecimentosComKmPorLitro.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Baseado em {abastecimentosComKmPorLitro.length} registro(s)
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+            <Card className="bg-card border-border shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Valor Total
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold text-green-500">
+                  R$ {totalValor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Tabela */}
+          <Card className="bg-card border-border shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-border/50 mb-4">
+              <CardTitle className="text-lg font-semibold text-foreground">Registros</CardTitle>
+              <div className="flex items-center gap-3">
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar por placa..."
+                    value={searchPlaca}
+                    onChange={(e) => setSearchPlaca(e.target.value)}
+                    className="pl-9 bg-white"
+                  />
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsPrintModalOpen(true)}
+                  className="gap-2"
+                >
+                  <Printer className="h-4 w-4" />
+                  Imprimir / PDF
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="px-6 pb-6">
+                <AbastecimentoTable
+                  abastecimentos={filteredAbastecimentos}
+                  onEdit={handleOpenForm}
+                  onDelete={handleOpenDeleteDialog}
+                  isLoading={isLoading}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <AbastecimentoFormModal
+          open={isFormOpen}
+          onOpenChange={setIsFormOpen}
+          abastecimento={selectedAbastecimento}
+          onSubmit={handleSubmit}
+          isLoading={createAbastecimento.isPending || updateAbastecimento.isPending}
+        />
+
+        <DeleteConfirmDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+          onConfirm={handleConfirmDelete}
+          isLoading={deleteAbastecimento.isPending}
+          title="Excluir Abastecimento"
+          description="Tem certeza que deseja excluir este abastecimento? Esta ação não pode ser desfeita."
+        />
+
+        <TablePrintModal
+          isOpen={isPrintModalOpen}
+          onClose={() => setIsPrintModalOpen(false)}
+          title="Relatório de Abastecimentos"
+          subtitle="Listagem completa de abastecimentos"
+          data={filteredAbastecimentos}
+          columns={printColumns}
+          filters={filtersText}
+        />
+      </div>
+    </ModuleLayout>
+  );
+};
+
+export default AbastecimentoPage;

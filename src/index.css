@@ -1,5 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,69 +9,66 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 209 40% 96%;
-    --foreground: 222 47% 11%;
+    /* Paleta Sofisticada - Tons Neutros e Terrosos */
+    --background: 40 20% 97%;
+    --foreground: 220 20% 18%;
 
-    --card: 210 40% 98%;
-    --card-foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 18%;
 
-    --popover: 214 31% 91%;
-    --popover-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 18%;
 
-    --primary: 216 19% 26%;
-    --primary-foreground: 210 19% 98%;
+    /* Primary: Cinza Carvão Elegante */
+    --primary: 220 15% 25%;
+    --primary-foreground: 40 20% 98%;
 
-    --secondary: 215 19% 34%;
-    --secondary-foreground: 210 40% 98%;
+    /* Secondary: Verde Floresta Suave */
+    --secondary: 160 25% 35%;
+    --secondary-foreground: 40 20% 98%;
 
-    --muted: 215 20% 65%;
-    --muted-foreground: 222 47% 11%;
+    --muted: 40 15% 92%;
+    --muted-foreground: 220 10% 45%;
 
-    --accent: 210 40% 98%;
-    --accent-foreground: 215 16% 46%;
+    /* Accent: Bordô Sofisticado */
+    --accent: 40 15% 94%;
+    --accent-foreground: 220 15% 25%;
 
-    --destructive: 0 72% 50%;
-    --destructive-foreground: 0 85% 97%;
+    /* Destructive: Vermelho Terroso */
+    --destructive: 0 55% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 212 26% 83%;
-    --input: 212 26% 83%;
-    --ring: 216 19% 26%;
+    --border: 40 15% 88%;
+    --input: 40 15% 88%;
+    --ring: 220 15% 25%;
 
-    --radius: 0rem;
+    /* Radius aumentado para suavidade */
+    --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Sidebar Elegante */
+    --sidebar-background: 220 15% 22%;
+    --sidebar-foreground: 40 20% 95%;
+    --sidebar-primary: 40 20% 95%;
+    --sidebar-primary-foreground: 220 15% 22%;
+    --sidebar-accent: 220 12% 30%;
+    --sidebar-accent-foreground: 40 20% 95%;
+    --sidebar-border: 220 12% 28%;
+    --sidebar-ring: 40 20% 95%;
 
-    --sidebar-foreground: 222 47% 11%;
+    /* Charts com tons sofisticados */
+    --chart-1: 160 25% 40%;
+    --chart-2: 220 15% 45%;
+    --chart-3: 35 45% 55%;
+    --chart-4: 0 35% 50%;
+    --chart-5: 200 20% 50%;
 
-    --sidebar-primary: 216 19% 26%;
+    --sidebar: 220 15% 22%;
 
-    --sidebar-primary-foreground: 210 19% 98%;
+    --font-sans: 'Lexend Deca', Arial, ui-sans-serif, system-ui, sans-serif;
 
-    --sidebar-accent: 215 19% 34%;
+    --font-serif: 'Lexend Deca', Arial, sans-serif;
 
-    --sidebar-accent-foreground: 210 40% 98%;
-
-    --sidebar-border: 212 26% 83%;
-
-    --sidebar-ring: 216 19% 26%;
-
-    --chart-1: 217 10% 64%;
-
-    --chart-2: 215 20% 65%;
-
-    --chart-3: 215 16% 46%;
-
-    --chart-4: 219 8% 46%;
-
-    --chart-5: 215 19% 34%;
-
-    --sidebar: 210 40% 98%;
-
-    --font-sans: 'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
-
-    --font-serif: 'Crimson Pro', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
-
-    --font-mono: 'SF Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
 
@@ -96,47 +92,53 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    /* Dark Mode Sofisticado */
+    --background: 220 18% 12%;
+    --foreground: 40 15% 92%;
 
-    --card: 217 32% 17%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 15% 16%;
+    --card-foreground: 40 15% 92%;
 
-    --popover: 215 24% 26%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 15% 18%;
+    --popover-foreground: 40 15% 92%;
 
-    --primary: 212 26% 83%;
-    --primary-foreground: 228 84% 4%;
+    --primary: 40 20% 90%;
+    --primary-foreground: 220 18% 12%;
 
-    --secondary: 215 19% 34%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 160 20% 45%;
+    --secondary-foreground: 40 15% 95%;
 
-    --muted: 215 16% 46%;
-    --muted-foreground: 210 40% 98%;
+    --muted: 220 12% 22%;
+    --muted-foreground: 40 10% 65%;
 
-    --accent: 228 84% 4%;
-    --accent-foreground: 215 20% 65%;
+    --accent: 220 12% 20%;
+    --accent-foreground: 40 15% 85%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 85% 97%;
+    --destructive: 0 50% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 215 19% 34%;
-    --input: 215 19% 34%;
-    --ring: 212 26% 83%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 212 26% 83%;
-    --sidebar-primary-foreground: 228 84% 4%;
-    --sidebar-accent: 215 20% 65%;
-    --sidebar-accent-foreground: 228 84% 4%;
-    --sidebar-border: 215 19% 34%;
-    --sidebar-ring: 212 26% 83%;
-    --chart-1: 215 12% 83%;
-    --chart-2: 212 26% 83%;
-    --chart-3: 215 20% 65%;
-    --chart-4: 217 10% 64%;
-    --chart-5: 215 16% 46%;
-    --sidebar: 217 32% 17%;
+    --border: 220 12% 25%;
+    --input: 220 12% 25%;
+    --ring: 40 20% 85%;
+
+    /* Sidebar Dark */
+    --sidebar-background: 220 18% 10%;
+    --sidebar-foreground: 40 15% 90%;
+    --sidebar-primary: 40 20% 90%;
+    --sidebar-primary-foreground: 220 18% 10%;
+    --sidebar-accent: 220 12% 18%;
+    --sidebar-accent-foreground: 40 15% 90%;
+    --sidebar-border: 220 12% 20%;
+    --sidebar-ring: 40 20% 85%;
+
+    /* Charts Dark */
+    --chart-1: 160 30% 55%;
+    --chart-2: 40 25% 65%;
+    --chart-3: 200 25% 60%;
+    --chart-4: 0 40% 60%;
+    --chart-5: 280 20% 60%;
+
+    --sidebar: 220 18% 10%;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
@@ -154,6 +156,72 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Tipografia com Lexend Deca */
+  h1, h2, h3 {
+    @apply font-sans tracking-tight;
+    letter-spacing: -0.01em;
+  }
+
+  h1 {
+    @apply text-3xl md:text-4xl font-semibold;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl font-semibold;
+  }
+
+  h3 {
+    @apply text-xl md:text-2xl font-medium;
+  }
+
+  /* Corpo do texto com melhor legibilidade */
+  p, span, div {
+    @apply leading-relaxed;
+  }
+
+  /* Links sofisticados */
+  a {
+    @apply transition-colors duration-200;
+  }
+
+  /* Seleção elegante */
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+}
+
+/* Componentes customizados para visual maduro */
+@layer components {
+  /* Cards com sombra sutil e hover elegante */
+  .card-elevated {
+    @apply bg-card border border-border/50 shadow-sm hover:shadow-md transition-all duration-300;
+  }
+
+  /* Botões com transição suave */
+  .btn-mature {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  /* Tabelas com visual clean */
+  .table-mature {
+    @apply border-separate border-spacing-0;
+  }
+
+  .table-mature th {
+    @apply bg-muted/50 font-medium text-muted-foreground uppercase text-xs tracking-wider;
+  }
+
+  .table-mature td {
+    @apply border-b border-border/50;
+  }
+
+  /* Input fields refinados */
+  .input-refined {
+    @apply transition-all duration-200 focus:ring-2 focus:ring-primary/20;
   }
 }

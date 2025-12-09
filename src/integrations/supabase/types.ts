@@ -92,6 +92,372 @@ export type Database = {
         }
         Relationships: []
       }
+      acertos_viagem: {
+        Row: {
+          id: string
+          veiculo_id: string | null
+          motorista_id: string | null
+          montador_id: string | null
+          destino: string
+          data_saida: string
+          data_chegada: string | null
+          km_saida: number | null
+          km_chegada: number | null
+          valor_adiantamento: number
+          despesa_combustivel: number
+          despesa_material_montagem: number
+          despesa_passagem_onibus: number
+          despesa_hotel: number
+          despesa_lavanderia: number
+          despesa_taxi_transporte: number
+          despesa_veiculo: number
+          despesa_ajudante: number
+          despesa_cartao_telefonico: number
+          despesa_alimentacao: number
+          despesa_diaria_motorista: number
+          despesa_diaria_montador: number
+          despesa_outros: number
+          despesa_outros_descricao: string | null
+          observacoes: string | null
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          veiculo_id?: string | null
+          motorista_id?: string | null
+          montador_id?: string | null
+          destino: string
+          data_saida: string
+          data_chegada?: string | null
+          km_saida?: number | null
+          km_chegada?: number | null
+          valor_adiantamento?: number
+          despesa_combustivel?: number
+          despesa_material_montagem?: number
+          despesa_passagem_onibus?: number
+          despesa_hotel?: number
+          despesa_lavanderia?: number
+          despesa_taxi_transporte?: number
+          despesa_veiculo?: number
+          despesa_ajudante?: number
+          despesa_cartao_telefonico?: number
+          despesa_alimentacao?: number
+          despesa_diaria_motorista?: number
+          despesa_diaria_montador?: number
+          despesa_outros?: number
+          despesa_outros_descricao?: string | null
+          observacoes?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          veiculo_id?: string | null
+          motorista_id?: string | null
+          montador_id?: string | null
+          destino?: string
+          data_saida?: string
+          data_chegada?: string | null
+          km_saida?: number | null
+          km_chegada?: number | null
+          valor_adiantamento?: number
+          despesa_combustivel?: number
+          despesa_material_montagem?: number
+          despesa_passagem_onibus?: number
+          despesa_hotel?: number
+          despesa_lavanderia?: number
+          despesa_taxi_transporte?: number
+          despesa_veiculo?: number
+          despesa_ajudante?: number
+          despesa_cartao_telefonico?: number
+          despesa_alimentacao?: number
+          despesa_diaria_motorista?: number
+          despesa_diaria_montador?: number
+          despesa_outros?: number
+          despesa_outros_descricao?: string | null
+          observacoes?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      acerto_viagem_entregas: {
+        Row: {
+          id: string
+          acerto_id: string
+          entrega_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          acerto_id: string
+          entrega_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          acerto_id?: string
+          entrega_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      veiculos: {
+        Row: {
+          id: string
+          placa: string
+          fabricante: string | null
+          modelo: string | null
+          tipo: string | null
+          ano: number | null
+          km_atual: number
+          ativo: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          placa: string
+          fabricante?: string | null
+          modelo?: string | null
+          tipo?: string | null
+          ano?: number | null
+          km_atual?: number
+          ativo?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          placa?: string
+          fabricante?: string | null
+          modelo?: string | null
+          tipo?: string | null
+          ano?: number | null
+          km_atual?: number
+          ativo?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      motoristas: {
+        Row: {
+          id: string
+          nome: string
+          funcao: string
+          numero_cnh: string | null
+          categoria_cnh: string | null
+          data_vencimento_cnh: string | null
+          data_exame_toxicologico: string | null
+          ativo: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          nome: string
+          funcao?: string
+          numero_cnh?: string | null
+          categoria_cnh?: string | null
+          data_vencimento_cnh?: string | null
+          data_exame_toxicologico?: string | null
+          ativo?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          nome?: string
+          funcao?: string
+          numero_cnh?: string | null
+          categoria_cnh?: string | null
+          data_vencimento_cnh?: string | null
+          data_exame_toxicologico?: string | null
+          ativo?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      montadores: {
+        Row: {
+          id: string
+          nome: string
+          ativo: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          nome: string
+          ativo?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          nome?: string
+          ativo?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      abastecimentos: {
+        Row: {
+          id: string
+          data: string
+          veiculo_id: string
+          condutor_id: string
+          posto: string
+          cidade: string
+          estado: string
+          km_inicial: number
+          litros: number
+          produto: string
+          valor_unitario: number
+          valor_total: number
+          km_por_litro: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          data: string
+          veiculo_id: string
+          condutor_id: string
+          posto: string
+          cidade: string
+          estado: string
+          km_inicial: number
+          litros: number
+          produto: string
+          valor_unitario: number
+          valor_total: number
+          km_por_litro?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          data?: string
+          veiculo_id?: string
+          condutor_id?: string
+          posto?: string
+          cidade?: string
+          estado?: string
+          km_inicial?: number
+          litros?: number
+          produto?: string
+          valor_unitario?: number
+          valor_total?: number
+          km_por_litro?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      manutencoes: {
+        Row: {
+          id: string
+          data: string
+          veiculo_id: string
+          estabelecimento: string
+          tipo_servico: string
+          descricao_servico: string | null
+          custo_total: number
+          km_manutencao: number
+          nota_fiscal: string | null
+          tipo_manutencao: string
+          status: string
+          problema_detectado: string | null
+          config_preventiva_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          data: string
+          veiculo_id: string
+          estabelecimento: string
+          tipo_servico: string
+          descricao_servico?: string | null
+          custo_total: number
+          km_manutencao: number
+          nota_fiscal?: string | null
+          tipo_manutencao?: string
+          status?: string
+          problema_detectado?: string | null
+          config_preventiva_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          data?: string
+          veiculo_id?: string
+          estabelecimento?: string
+          tipo_servico?: string
+          descricao_servico?: string | null
+          custo_total?: number
+          km_manutencao?: number
+          nota_fiscal?: string | null
+          tipo_manutencao?: string
+          status?: string
+          problema_detectado?: string | null
+          config_preventiva_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      manutencoes_preventivas_config: {
+        Row: {
+          id: string
+          veiculo_id: string
+          nome_servico: string
+          intervalo_km: number
+          margem_alerta_km: number
+          km_ultima_manutencao: number | null
+          km_proxima_manutencao: number | null
+          aguardando_primeira_manutencao: boolean
+          ativo: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          veiculo_id: string
+          nome_servico: string
+          intervalo_km: number
+          margem_alerta_km: number
+          km_ultima_manutencao?: number | null
+          km_proxima_manutencao?: number | null
+          aguardando_primeira_manutencao?: boolean
+          ativo?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          veiculo_id?: string
+          nome_servico?: string
+          intervalo_km?: number
+          margem_alerta_km?: number
+          km_ultima_manutencao?: number | null
+          km_proxima_manutencao?: number | null
+          aguardando_primeira_manutencao?: boolean
+          ativo?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,0 +1,176 @@
+import { useState } from 'react';
+import { Edit, Trash2, Printer, Eye, MoreHorizontal } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { DeleteConfirmDialog } from '@/components/dashboard/DeleteConfirmDialog';
+import { useDeleteAcertoViagem } from '@/hooks/useAcertosViagem';
+import { AcertoViagem, calcularTotalDespesas, calcularSaldo, calcularDiasViagem } from '@/types/acertoViagem';
+
+interface AcertoViagemTableProps {
+  acertos: AcertoViagem[];
+  isLoading: boolean;
+  onEdit: (acerto: AcertoViagem) => void;
+  onPrint: (acerto: AcertoViagem) => void;
+}
+
+export function AcertoViagemTable({ acertos, isLoading, onEdit, onPrint }: AcertoViagemTableProps) {
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const deleteAcerto = useDeleteAcertoViagem();
+
+  const handleDelete = () => {
+    if (deleteId) {
+      deleteAcerto.mutate(deleteId);
+      setDeleteId(null);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'PENDENTE':
+        return <Badge className="bg-yellow-500">Pendente</Badge>;
+      case 'ACERTADO':
+        return <Badge className="bg-green-500">Acertado</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  const formatDate = (date: string | null) => {
+    if (!date) return '-';
+    return new Date(date).toLocaleDateString('pt-BR');
+  };
+
+  const getResponsavel = (acerto: AcertoViagem) => {
+    if (acerto.motorista_nome && acerto.montador_nome) {
+      return `${acerto.motorista_nome} / ${acerto.montador_nome}`;
+    }
+    return acerto.motorista_nome || acerto.montador_nome || '-';
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (acertos.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        Nenhum acerto de viagem encontrado.
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="rounded-lg border overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Destino</TableHead>
+              <TableHead>Responsável</TableHead>
+              <TableHead>Veículo</TableHead>
+              <TableHead className="text-center">Período</TableHead>
+              <TableHead className="text-center">Dias</TableHead>
+              <TableHead className="text-right">Adiantamento</TableHead>
+              <TableHead className="text-right">Despesas</TableHead>
+              <TableHead className="text-right">Saldo</TableHead>
+              <TableHead className="text-center">Status</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {acertos.map((acerto) => {
+              const totalDespesas = calcularTotalDespesas(acerto);
+              const saldo = calcularSaldo(acerto);
+              const dias = calcularDiasViagem(acerto.data_saida, acerto.data_chegada);
+
+              return (
+                <TableRow key={acerto.id}>
+                  <TableCell className="font-medium">{acerto.destino}</TableCell>
+                  <TableCell>{getResponsavel(acerto)}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{acerto.veiculo_placa || '-'}</span>
+                      <span className="text-xs text-muted-foreground">{acerto.veiculo_modelo}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex flex-col text-sm">
+                      <span>{formatDate(acerto.data_saida)}</span>
+                      <span className="text-muted-foreground">{formatDate(acerto.data_chegada)}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Badge variant="outline">{dias > 0 ? `${dias} dias` : '-'}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    R$ {(acerto.valor_adiantamento || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </TableCell>
+                  <TableCell className="text-right text-orange-500 font-medium">
+                    R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <span className={saldo.tipo === 'devolver' ? 'text-green-500' : 'text-red-500'}>
+                      {saldo.tipo === 'devolver' ? '+' : '-'} R$ {saldo.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>
+                    <p className="text-xs text-muted-foreground">
+                      {saldo.tipo === 'devolver' ? 'a devolver' : 'a receber'}
+                    </p>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {getStatusBadge(acerto.status)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => onPrint(acerto)}>
+                          <Printer className="h-4 w-4 mr-2" />
+                          Imprimir
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onEdit(acerto)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => setDeleteId(acerto.id)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+
+      <DeleteConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        onConfirm={handleDelete}
+        isLoading={deleteAcerto.isPending}
+        title="Excluir Acerto de Viagem"
+        description="Tem certeza que deseja excluir este acerto de viagem? Esta ação não pode ser desfeita."
+      />
+    </>
+  );
+}

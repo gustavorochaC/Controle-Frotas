@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { Plus, Truck } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, Truck, Settings, Fuel } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { KPICards } from '@/components/dashboard/KPICards';
 import { EntregaFilters } from '@/components/dashboard/EntregaFilters';
@@ -7,7 +8,7 @@ import { EntregaTable } from '@/components/dashboard/EntregaTable';
 import { EntregaFormModal } from '@/components/dashboard/EntregaFormModal';
 import { DeleteConfirmDialog } from '@/components/dashboard/DeleteConfirmDialog';
 import { useEntregas, useCreateEntrega, useUpdateEntrega, useDeleteEntrega } from '@/hooks/useEntregas';
-import { Entrega } from '@/types/entrega';
+import { Entrega, EntregaFormData } from '@/types/entrega';
 import { format } from 'date-fns';
 
 const Index = () => {
@@ -64,7 +65,7 @@ const Index = () => {
     setSelectedEntrega(null);
   };
 
-  const handleSubmit = (data: any) => {
+  const handleSubmit = (data: Partial<EntregaFormData> & { montador_1?: string; montador_2?: string; data_saida?: Date; data_montagem?: Date }) => {
     const formattedData = {
       ...data,
       data_saida: data.data_saida ? format(data.data_saida, 'yyyy-MM-dd') : null,
@@ -129,10 +130,24 @@ const Index = () => {
                 </p>
               </div>
             </div>
-            <Button onClick={() => handleOpenForm()} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Nova Entrega
-            </Button>
+            <div className="flex items-center gap-2">
+              <Link to="/abastecimento">
+                <Button variant="outline" className="gap-2">
+                  <Fuel className="h-4 w-4" />
+                  Abastecimento
+                </Button>
+              </Link>
+              <Link to="/cadastros">
+                <Button variant="outline" className="gap-2">
+                  <Settings className="h-4 w-4" />
+                  Cadastros
+                </Button>
+              </Link>
+              <Button onClick={() => handleOpenForm()} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Nova Entrega
+              </Button>
+            </div>
           </div>
         </div>
       </header>

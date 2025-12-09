@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, X, Plus } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
@@ -27,6 +29,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { Entrega, ESTADOS_BRASILEIROS, STATUS_OPTIONS, TIPO_TRANSPORTE_OPTIONS } from '@/types/entrega';
+import { useMotoristas } from '@/hooks/useMotoristas';
+import { useVeiculos } from '@/hooks/useVeiculos';
+import { useMontadores } from '@/hooks/useMontadores';
 
 const formSchema = z.object({
   pv_foco: z.string().optional(),
@@ -41,8 +46,7 @@ const formSchema = z.object({
   status: z.string().optional(),
   precisa_montagem: z.boolean().optional(),
   data_montagem: z.date().optional(),
-  montador_1: z.string().optional(),
-  montador_2: z.string().optional(),
+  montadores: z.string().optional(),
   gastos_entrega: z.coerce.number().min(0).optional(),
   gastos_montagem: z.coerce.number().min(0).optional(),
   produtividade: z.coerce.number().min(0).optional(),
@@ -56,7 +60,7 @@ interface EntregaFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   entrega: Entrega | null;
-  onSubmit: (data: FormData) => void;
+  onSubmit: (data: FormData & { montador_1?: string; montador_2?: string }) => void;
   isLoading: boolean;
 }
 
@@ -67,6 +71,12 @@ export function EntregaFormModal({
   onSubmit,
   isLoading
 }: EntregaFormModalProps) {
+  const { data: motoristas = [] } = useMotoristas();
+  const { data: veiculos = [] } = useVeiculos();
+  const { data: montadoresData = [] } = useMontadores();
+  
+  const [selectedMontadores, setSelectedMontadores] = useState<string[]>([]);
+  
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -80,8 +90,7 @@ export function EntregaFormModal({
       tipo_transporte: '',
       status: 'PENDENTE',
       precisa_montagem: false,
-      montador_1: '',
-      montador_2: '',
+      montadores: '',
       gastos_entrega: 0,
       gastos_montagem: 0,
       produtividade: 0,
@@ -92,6 +101,12 @@ export function EntregaFormModal({
 
   useEffect(() => {
     if (entrega) {
+      // Combinar montador_1 e montador_2 existentes em um array
+      const existingMontadores: string[] = [];
+      if (entrega.montador_1) existingMontadores.push(entrega.montador_1);
+      if (entrega.montador_2) existingMontadores.push(entrega.montador_2);
+      setSelectedMontadores(existingMontadores);
+      
       form.reset({
         pv_foco: entrega.pv_foco || '',
         nf: entrega.nf || '',
@@ -105,8 +120,7 @@ export function EntregaFormModal({
         status: entrega.status || 'PENDENTE',
         precisa_montagem: entrega.precisa_montagem || false,
         data_montagem: entrega.data_montagem ? new Date(entrega.data_montagem) : undefined,
-        montador_1: entrega.montador_1 || '',
-        montador_2: entrega.montador_2 || '',
+        montadores: existingMontadores.join(', '),
         gastos_entrega: entrega.gastos_entrega || 0,
         gastos_montagem: entrega.gastos_montagem || 0,
         produtividade: entrega.produtividade || 0,
@@ -114,6 +128,7 @@ export function EntregaFormModal({
         descricao_erros: entrega.descricao_erros || '',
       });
     } else {
+      setSelectedMontadores([]);
       form.reset({
         pv_foco: '',
         nf: '',
@@ -125,8 +140,7 @@ export function EntregaFormModal({
         tipo_transporte: '',
         status: 'PENDENTE',
         precisa_montagem: false,
-        montador_1: '',
-        montador_2: '',
+        montadores: '',
         gastos_entrega: 0,
         gastos_montagem: 0,
         produtividade: 0,
@@ -136,8 +150,33 @@ export function EntregaFormModal({
     }
   }, [entrega, form]);
 
+  const addMontador = (nome: string) => {
+    if (nome && !selectedMontadores.includes(nome)) {
+      const newMontadores = [...selectedMontadores, nome];
+      setSelectedMontadores(newMontadores);
+      form.setValue('montadores', newMontadores.join(', '));
+    }
+  };
+
+  const removeMontador = (nome: string) => {
+    const newMontadores = selectedMontadores.filter(m => m !== nome);
+    setSelectedMontadores(newMontadores);
+    form.setValue('montadores', newMontadores.join(', '));
+  };
+
+  // Montadores disponíveis (que ainda não foram selecionados)
+  const availableMontadores = montadoresData.filter(
+    m => m.ativo && !selectedMontadores.includes(m.nome)
+  );
+
   const handleSubmit = (data: FormData) => {
-    onSubmit(data);
+    // Converter montadores de volta para montador_1 e montador_2 para compatibilidade
+    const submitData = {
+      ...data,
+      montador_1: selectedMontadores[0] || '',
+      montador_2: selectedMontadores[1] || '',
+    };
+    onSubmit(submitData);
   };
 
   return (
@@ -190,7 +229,12 @@ export function EntregaFormModal({
                     <FormItem>
                       <FormLabel>Valor (R$)</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.01" {...field} className="bg-background border-border" />
+                        <CurrencyInput
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          className="bg-background border-border"
+                          placeholder="0,00"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -302,9 +346,20 @@ export function EntregaFormModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Motorista</FormLabel>
-                      <FormControl>
-                        <Input {...field} className="bg-background border-border" />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="bg-background border-border">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-popover border-border">
+                          {motoristas.map((motorista) => (
+                            <SelectItem key={motorista.id} value={motorista.nome}>
+                              {motorista.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -315,9 +370,20 @@ export function EntregaFormModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Veículo</FormLabel>
-                      <FormControl>
-                        <Input {...field} className="bg-background border-border" />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="bg-background border-border">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-popover border-border">
+                          {veiculos.map((veiculo) => (
+                            <SelectItem key={veiculo.id} value={`${veiculo.modelo || veiculo.fabricante || 'Sem modelo'} - ${veiculo.placa}`}>
+                              {veiculo.modelo || veiculo.fabricante || 'Sem modelo'} - {veiculo.placa}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -404,32 +470,61 @@ export function EntregaFormModal({
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="montador_1"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Montador 1</FormLabel>
-                      <FormControl>
-                        <Input {...field} className="bg-background border-border" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="montador_2"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Montador 2</FormLabel>
-                      <FormControl>
-                        <Input {...field} className="bg-background border-border" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="md:col-span-2">
+                  <FormItem>
+                    <FormLabel>Montadores</FormLabel>
+                    <div className="space-y-3">
+                      {/* Montadores selecionados */}
+                      {selectedMontadores.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {selectedMontadores.map((nome) => (
+                            <Badge
+                              key={nome}
+                              variant="secondary"
+                              className="flex items-center gap-1 py-1 px-2"
+                            >
+                              {nome}
+                              <button
+                                type="button"
+                                onClick={() => removeMontador(nome)}
+                                className="ml-1 hover:bg-destructive hover:text-destructive-foreground rounded-full p-0.5"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {/* Seletor para adicionar mais montadores */}
+                      {availableMontadores.length > 0 && (
+                        <Select onValueChange={(value) => addMontador(value)} value="">
+                          <SelectTrigger className="bg-background border-border">
+                            <SelectValue placeholder="Adicionar montador..." />
+                          </SelectTrigger>
+                          <SelectContent className="bg-popover border-border">
+                            {availableMontadores.map((montador) => (
+                              <SelectItem key={montador.id} value={montador.nome}>
+                                <div className="flex items-center gap-2">
+                                  <Plus className="h-4 w-4" />
+                                  {montador.nome}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                      
+                      {availableMontadores.length === 0 && selectedMontadores.length === 0 && (
+                        <p className="text-sm text-muted-foreground">Nenhum montador cadastrado</p>
+                      )}
+                      
+                      {availableMontadores.length === 0 && selectedMontadores.length > 0 && (
+                        <p className="text-sm text-muted-foreground">Todos os montadores já foram selecionados</p>
+                      )}
+                    </div>
+                  </FormItem>
+                </div>
               </div>
             </div>
 
@@ -446,7 +541,12 @@ export function EntregaFormModal({
                     <FormItem>
                       <FormLabel>Gastos Entrega (R$)</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.01" {...field} className="bg-background border-border" />
+                        <CurrencyInput
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          className="bg-background border-border"
+                          placeholder="0,00"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -459,7 +559,12 @@ export function EntregaFormModal({
                     <FormItem>
                       <FormLabel>Gastos Montagem (R$)</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.01" {...field} className="bg-background border-border" />
+                        <CurrencyInput
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          className="bg-background border-border"
+                          placeholder="0,00"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

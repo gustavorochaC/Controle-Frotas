@@ -1,3 +1,6 @@
+// Tipos literais para status
+export type StatusEntrega = 'PENDENTE' | 'EM ROTA' | 'CONCLUIDO' | 'CANCELADO';
+
 export interface Entrega {
   id: string;
   pv_foco: string | null;
@@ -9,7 +12,7 @@ export interface Entrega {
   motorista: string | null;
   carro: string | null;
   tipo_transporte: string | null;
-  status: string | null;
+  status: StatusEntrega | null;
   precisa_montagem: boolean | null;
   data_montagem: string | null;
   montador_1: string | null;
@@ -34,7 +37,7 @@ export interface EntregaFormData {
   motorista: string;
   carro: string;
   tipo_transporte: string;
-  status: string;
+  status: StatusEntrega;
   precisa_montagem: boolean;
   data_montagem: string;
   montador_1: string;
@@ -53,7 +56,7 @@ export const ESTADOS_BRASILEIROS = [
   'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
 ];
 
-export const STATUS_OPTIONS = [
+export const STATUS_OPTIONS: StatusEntrega[] = [
   'PENDENTE',
   'EM ROTA',
   'CONCLUIDO',

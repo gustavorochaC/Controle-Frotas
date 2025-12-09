@@ -14,7 +14,9 @@ interface DeleteConfirmDialogProps {
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
   isLoading: boolean;
-  clienteName: string;
+  clienteName?: string;
+  title?: string;
+  description?: string;
 }
 
 export function DeleteConfirmDialog({
@@ -22,19 +24,25 @@ export function DeleteConfirmDialog({
   onOpenChange,
   onConfirm,
   isLoading,
-  clienteName
+  clienteName,
+  title,
+  description
 }: DeleteConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="bg-card border-border">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-foreground">
-            Confirmar Exclusão
+            {title || 'Confirmar Exclusão'}
           </AlertDialogTitle>
           <AlertDialogDescription className="text-muted-foreground">
-            Tem certeza que deseja excluir a entrega do cliente{' '}
-            <strong className="text-foreground">{clienteName}</strong>?
-            Esta ação não pode ser desfeita.
+            {description || (
+              <>
+                Tem certeza que deseja excluir a entrega do cliente{' '}
+                <strong className="text-foreground">{clienteName}</strong>?
+                Esta ação não pode ser desfeita.
+              </>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
