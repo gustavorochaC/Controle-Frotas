@@ -16,25 +16,24 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreateMotorista, useUpdateMotorista } from '@/hooks/useMotoristas';
-import { Motorista, FUNCOES_MOTORISTA, CATEGORIAS_CNH, CategoriaCNH } from '@/types/motorista';
+import { Motorista, CATEGORIAS_CNH, CategoriaCNH } from '@/types/motorista';
 
 const formSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório'),
-  funcao: z.enum(['Motorista', 'Condutor'], { required_error: 'Função é obrigatória' }),
-  numero_cnh: z.string().min(1, 'Número da CNH é obrigatório'),
-  categoria_cnh: z.string().min(1, 'Categoria é obrigatória'),
+  eh_motorista: z.boolean().default(false),
+  eh_montador: z.boolean().default(false),
+  numero_cnh: z.string().optional(),
+  categoria_cnh: z.string().optional(),
   data_vencimento_cnh: z.string().optional(),
   data_exame_toxicologico: z.string().optional(),
+}).refine(data => data.eh_motorista || data.eh_montador, {
+  message: 'Selecione pelo menos uma função (Motorista ou Montador)',
+  path: ['eh_motorista'],
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -59,7 +58,8 @@ export function MotoristaFormModal({
     resolver: zodResolver(formSchema),
     defaultValues: {
       nome: '',
-      funcao: 'Motorista',
+      eh_motorista: true,
+      eh_montador: false,
       numero_cnh: '',
       categoria_cnh: '',
       data_vencimento_cnh: '',
@@ -71,7 +71,8 @@ export function MotoristaFormModal({
     if (motorista) {
       form.reset({
         nome: motorista.nome,
-        funcao: motorista.funcao || 'Motorista',
+        eh_motorista: motorista.eh_motorista ?? (motorista.funcao === 'Motorista' || motorista.funcao === 'Condutor') ?? true,
+        eh_montador: motorista.eh_montador || false,
         numero_cnh: motorista.numero_cnh || '',
         categoria_cnh: motorista.categoria_cnh || '',
         data_vencimento_cnh: motorista.data_vencimento_cnh || '',
@@ -80,7 +81,8 @@ export function MotoristaFormModal({
     } else {
       form.reset({
         nome: '',
-        funcao: 'Motorista',
+        eh_motorista: true,
+        eh_montador: false,
         numero_cnh: '',
         categoria_cnh: '',
         data_vencimento_cnh: '',
@@ -92,7 +94,8 @@ export function MotoristaFormModal({
   const handleSubmit = (data: FormData) => {
     const formData = { 
       nome: data.nome, 
-      funcao: data.funcao,
+      eh_motorista: data.eh_motorista || false,
+      eh_montador: data.eh_montador || false,
       numero_cnh: data.numero_cnh || undefined,
       categoria_cnh: (data.categoria_cnh as CategoriaCNH) || undefined,
       data_vencimento_cnh: data.data_vencimento_cnh || undefined,
@@ -119,46 +122,67 @@ export function MotoristaFormModal({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="nome"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome *</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      placeholder="Nome completo"
+                      className="bg-background border-border" 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="space-y-3">
               <FormField
                 control={form.control}
-                name="nome"
+                name="eh_motorista"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome *</FormLabel>
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-border p-4">
                     <FormControl>
-                      <Input 
-                        {...field} 
-                        placeholder="Nome completo"
-                        className="bg-background border-border" 
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-foreground">
+                        É Motorista / Condutor
+                      </FormLabel>
+                      <p className="text-xs text-muted-foreground">
+                        Marque esta opção se a pessoa exerce a função de motorista ou condutor
+                      </p>
+                    </div>
                   </FormItem>
                 )}
               />
 
               <FormField
                 control={form.control}
-                name="funcao"
+                name="eh_montador"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Função *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="bg-background border-border">
-                          <SelectValue placeholder="Selecione a função" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {FUNCOES_MOTORISTA.map((funcao) => (
-                          <SelectItem key={funcao} value={funcao}>
-                            {funcao}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-foreground">
+                        É Montador
+                      </FormLabel>
+                      <p className="text-xs text-muted-foreground">
+                        Marque esta opção se a pessoa exerce a função de montador
+                      </p>
+                    </div>
                   </FormItem>
                 )}
               />
@@ -172,7 +196,7 @@ export function MotoristaFormModal({
                   name="numero_cnh"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Número da CNH *</FormLabel>
+                      <FormLabel>Número da CNH</FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
@@ -190,7 +214,7 @@ export function MotoristaFormModal({
                   name="categoria_cnh"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Categoria *</FormLabel>
+                      <FormLabel>Categoria</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="bg-background border-border">

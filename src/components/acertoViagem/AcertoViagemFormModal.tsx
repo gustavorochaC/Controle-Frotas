@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -32,9 +32,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Search } from 'lucide-react';
 import { useVeiculos } from '@/hooks/useVeiculos';
 import { useMotoristas } from '@/hooks/useMotoristas';
-import { useMontadores } from '@/hooks/useMontadores';
 import { 
   useCreateAcertoViagem, 
   useUpdateAcertoViagem,
@@ -67,8 +67,7 @@ type EntregaDisponivel = {
 
 const formSchema = z.object({
   veiculo_id: z.string().min(1, 'Selecione um veículo'),
-  motorista_id: z.string().nullable(),
-  montador_id: z.string().nullable(),
+  motorista_id: z.string().min(1, 'Selecione um motorista'),
   destino: z.string().min(1, 'Informe o destino'),
   data_saida: z.string().min(1, 'Informe a data de saída'),
   data_chegada: z.string(),
@@ -95,9 +94,6 @@ const formSchema = z.object({
   observacoes: z.string(),
   status: z.enum(['PENDENTE', 'ACERTADO']),
   entregas_ids: z.array(z.string()),
-}).refine(data => data.motorista_id || data.montador_id, {
-  message: 'Selecione pelo menos um motorista ou montador',
-  path: ['motorista_id'],
 });
 
 interface AcertoViagemFormModalProps {
@@ -109,9 +105,9 @@ interface AcertoViagemFormModalProps {
 export function AcertoViagemFormModal({ isOpen, onClose, acerto }: AcertoViagemFormModalProps) {
   const { data: veiculos = [] } = useVeiculos();
   const { data: motoristas = [] } = useMotoristas(true);
-  const { data: montadores = [] } = useMontadores();
   const { data: entregasDisponiveis = [] } = useEntregasDisponiveis();
   const { data: acertoCompleto } = useAcertoViagem(acerto?.id || null);
+  const [buscaEntrega, setBuscaEntrega] = useState('');
   
   const createAcerto = useCreateAcertoViagem();
   const updateAcerto = useUpdateAcertoViagem();
@@ -120,8 +116,7 @@ export function AcertoViagemFormModal({ isOpen, onClose, acerto }: AcertoViagemF
     resolver: zodResolver(formSchema),
     defaultValues: {
       veiculo_id: '',
-      motorista_id: null,
-      montador_id: null,
+      motorista_id: '',
       destino: '',
       data_saida: new Date().toISOString().split('T')[0],
       data_chegada: '',
@@ -148,13 +143,19 @@ export function AcertoViagemFormModal({ isOpen, onClose, acerto }: AcertoViagemF
     },
   });
 
+  // Resetar busca quando modal abrir/fechar
+  useEffect(() => {
+    if (!isOpen) {
+      setBuscaEntrega('');
+    }
+  }, [isOpen]);
+
   // Carregar dados do acerto para edição
   useEffect(() => {
     if (acertoCompleto) {
       form.reset({
         veiculo_id: acertoCompleto.veiculo_id || '',
-        motorista_id: acertoCompleto.motorista_id,
-        montador_id: acertoCompleto.montador_id,
+        motorista_id: acertoCompleto.motorista_id || '',
         destino: acertoCompleto.destino,
         data_saida: acertoCompleto.data_saida,
         data_chegada: acertoCompleto.data_chegada || '',
@@ -210,14 +211,43 @@ export function AcertoViagemFormModal({ isOpen, onClose, acerto }: AcertoViagemF
     return todas;
   }, [entregasDisponiveis, acertoCompleto]);
 
+  // Filtrar entregas por busca (PV FOCO, cliente, etc)
+  const entregasFiltradas = useMemo(() => {
+    if (!buscaEntrega.trim()) return entregasParaExibir;
+    
+    const buscaLower = buscaEntrega.toLowerCase();
+    return entregasParaExibir.filter(entrega => {
+      const pvFoco = entrega.pv_foco?.toLowerCase() || '';
+      const cliente = entrega.cliente?.toLowerCase() || '';
+      const notaFiscal = entrega.nota_fiscal?.toLowerCase() || '';
+      return pvFoco.includes(buscaLower) || cliente.includes(buscaLower) || notaFiscal.includes(buscaLower);
+    });
+  }, [entregasParaExibir, buscaEntrega]);
+
+
   const onSubmit = (data: AcertoViagemFormData) => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AcertoViagemFormModal.tsx:221',message:'onSubmit chamado',data:{isEdit:!!acerto,entregasIdsCount:data.entregas_ids.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
     if (acerto) {
       updateAcerto.mutate({ id: acerto.id, formData: data }, {
-        onSuccess: () => onClose(),
+        onSuccess: () => {
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AcertoViagemFormModal.tsx:225',message:'Update sucesso, fechando modal',data:{timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+          // #endregion
+          setBuscaEntrega('');
+          onClose();
+        },
       });
     } else {
       createAcerto.mutate(data, {
-        onSuccess: () => onClose(),
+        onSuccess: () => {
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AcertoViagemFormModal.tsx:232',message:'Create sucesso, fechando modal',data:{timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+          // #endregion
+          setBuscaEntrega('');
+          onClose();
+        },
       });
     }
   };
@@ -275,65 +305,43 @@ export function AcertoViagemFormModal({ isOpen, onClose, acerto }: AcertoViagemF
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="motorista_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Motorista</FormLabel>
-                          <Select 
-                            onValueChange={(v) => field.onChange(v === 'none' ? null : v)} 
-                            value={field.value || 'none'}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione o motorista" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="none">Nenhum</SelectItem>
-                              {motoristas.filter(m => m.ativo).map((m) => (
+                  <FormField
+                    control={form.control}
+                    name="motorista_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Motorista/Montador *</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o motorista ou montador" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {motoristas.filter(m => m.ativo).map((m) => {
+                              const funcoes = [];
+                              if (m.eh_motorista) {
+                                funcoes.push('Motorista/Condutor');
+                              }
+                              if (m.eh_montador) {
+                                funcoes.push('Montador');
+                              }
+                              const funcoesStr = funcoes.length > 0 ? ` (${funcoes.join(', ')})` : '';
+                              return (
                                 <SelectItem key={m.id} value={m.id}>
-                                  {m.nome}
+                                  {m.nome}{funcoesStr}
                                 </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="montador_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Montador</FormLabel>
-                          <Select 
-                            onValueChange={(v) => field.onChange(v === 'none' ? null : v)} 
-                            value={field.value || 'none'}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione o montador" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="none">Nenhum</SelectItem>
-                              {montadores.filter(m => m.ativo).map((m) => (
-                                <SelectItem key={m.id} value={m.id}>
-                                  {m.nome}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <FormField
@@ -568,13 +576,26 @@ export function AcertoViagemFormModal({ isOpen, onClose, acerto }: AcertoViagemF
                     name="entregas_ids"
                     render={({ field }) => (
                       <FormItem>
+                        <div className="mb-3">
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              placeholder="Buscar por PV FOCO, cliente ou nota fiscal..."
+                              value={buscaEntrega}
+                              onChange={(e) => setBuscaEntrega(e.target.value)}
+                              className="pl-9"
+                            />
+                          </div>
+                        </div>
                         <div className="max-h-48 overflow-y-auto border rounded-lg p-2 space-y-2">
-                          {entregasParaExibir.length === 0 ? (
+                          {entregasFiltradas.length === 0 ? (
                             <p className="text-sm text-muted-foreground text-center py-4">
-                              Nenhuma entrega disponível para vincular
+                              {buscaEntrega.trim() 
+                                ? 'Nenhuma entrega encontrada com o termo buscado'
+                                : 'Nenhuma entrega disponível para vincular'}
                             </p>
                           ) : (
-                            entregasParaExibir.map((entrega) => (
+                            entregasFiltradas.map((entrega) => (
                               <div 
                                 key={entrega.id} 
                                 className="flex items-center space-x-3 p-2 rounded hover:bg-muted"

@@ -1,78 +1,308 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  Truck, 
-  Fuel, 
-  Wrench, 
-  TrendingUp, 
-  Receipt, 
-  Settings, 
-  HelpCircle, 
-  LogOut,
+import {
+  Truck,
+  Fuel,
+  Wrench,
   LayoutDashboard,
-  ChevronRight
+  Wallet,
+  Users,
+  Upload,
+  FileBarChart,
+  LifeBuoy,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { useTheme } from '@/components/theme-provider';
+import { isImportEnabled } from '@/utils/featureFlags';
 
-interface AppSidebarProps {
-  module?: string; // Mantido para compatibilidade, mas não usado para renderização condicional pesada
+interface NavItem {
+  icon: React.ElementType;
+  label: string;
+  to: string;
 }
 
-export function AppSidebar({ module }: AppSidebarProps) {
-  const location = useLocation();
+const operationItems: NavItem[] = [
+  { icon: LayoutDashboard, label: 'Dashboard', to: '/' },
+  { icon: Truck, label: 'Entregas', to: '/entregas' },
+  { icon: Fuel, label: 'Abastecimento', to: '/abastecimento' },
+  { icon: Wrench, label: 'Manutenção', to: '/manutencao' },
+];
 
-  const SidebarItem = ({ icon: Icon, label, to }: { icon: any, label: string, to: string }) => {
-    const isActive = location.pathname === to;
-    
-    return (
-      <Link 
-        to={to} 
-        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
-          isActive 
-            ? 'bg-primary text-primary-foreground shadow-md' 
-            : 'text-slate-400 hover:text-white hover:bg-white/5'
-        }`}
+const financeItems: NavItem[] = [
+  { icon: Wallet, label: 'Acerto de Viagem', to: '/acerto-viagem' },
+];
+
+const getManagementItems = (): NavItem[] => {
+  const baseItems: NavItem[] = [
+    { icon: Users, label: 'Cadastros', to: '/cadastros' },
+    { icon: FileBarChart, label: 'Relatórios', to: '/resumo-geral' },
+  ];
+
+  if (isImportEnabled()) {
+    baseItems.splice(1, 0, { icon: Upload, label: 'Importação', to: '/importacao' });
+  }
+
+  return baseItems;
+};
+
+export function AppSidebar() {
+  // CRITICAL: Always reset to expanded state on page load (no localStorage)
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const location = useLocation();
+  const { theme, setTheme } = useTheme();
+
+  const toggleSidebar = () => setIsCollapsed(prev => !prev);
+  const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
+
+  const NavLink = ({ item }: { item: NavItem }) => {
+    const isActive = location.pathname === item.to;
+    const Icon = item.icon;
+
+    const linkContent = (
+      <Link
+        to={item.to}
+        className={`
+          relative flex items-center gap-3 px-3 py-2.5 rounded-xl
+          transition-all duration-200 group
+          ${isCollapsed ? 'justify-center' : ''}
+          ${isActive
+            ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 shadow-sm'
+            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5'
+          }
+        `}
       >
-        <Icon className={`h-5 w-5 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
-        <span className="font-medium text-sm tracking-wide">{label}</span>
-        {isActive && <ChevronRight className="ml-auto h-4 w-4 opacity-50" />}
+        <Icon className="h-5 w-5 flex-shrink-0" />
+
+        <span
+          className={`
+            font-medium text-sm whitespace-nowrap
+            transition-all duration-300 ease-in-out
+            ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}
+          `}
+        >
+          {item.label}
+        </span>
+
+        {/* Active dot indicator */}
+        {isActive && !isCollapsed && (
+          <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
+        )}
       </Link>
     );
+
+    if (isCollapsed) {
+      return (
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            {linkContent}
+          </TooltipTrigger>
+          <TooltipContent
+            side="right"
+            className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 font-medium shadow-lg"
+          >
+            {item.label}
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
+    return linkContent;
   };
 
+  const SectionLabel = ({ children }: { children: React.ReactNode }) => (
+    <div className={`
+      px-3 mb-2 transition-all duration-300 ease-in-out overflow-hidden
+      ${isCollapsed ? 'h-0 opacity-0' : 'h-auto opacity-100'}
+    `}>
+      <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+        {children}
+      </p>
+    </div>
+  );
+
+  const Divider = () => (
+    <div className={`my-4 border-t border-gray-100 dark:border-white/5 transition-all duration-300 ${isCollapsed ? 'mx-2' : 'mx-3'}`} />
+  );
+
   return (
-    <aside className="w-64 bg-slate-900 text-white flex-shrink-0 flex flex-col shadow-xl z-20 h-screen">
-      <div className="p-6 border-b border-white/10">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-            <Truck className="h-5 w-5 text-primary-foreground" />
+    <TooltipProvider>
+      <aside
+        className={`
+          ${isCollapsed ? 'w-[72px]' : 'w-64'} 
+          bg-white dark:bg-[#181b21]
+          flex-shrink-0 flex flex-col 
+          border-r border-gray-200 dark:border-white/5
+          h-screen transition-all duration-300 ease-in-out
+        `}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-white/5">
+          <div className={`flex items-center gap-3 overflow-hidden transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
+            {/* Logo Clean */}
+            <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 rounded-2xl flex items-center justify-center shadow-sm">
+              <Truck className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-base font-bold tracking-tight text-gray-900 dark:text-gray-100">SCV</h1>
+              <p className="text-[10px] text-gray-500 font-medium">Fleet Control</p>
+            </div>
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-white">SCV</h1>
+
+          {/* Mini logo when collapsed */}
+          {isCollapsed && (
+            <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 rounded-2xl flex items-center justify-center shadow-sm mx-auto">
+              <Truck className="h-5 w-5 text-white" />
+            </div>
+          )}
+
+          {!isCollapsed && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleSidebar}
+              className="h-8 w-8 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+          )}
         </div>
-        <p className="text-xs text-slate-400 pl-11">Controle de Veículos</p>
-      </div>
 
-      <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-        <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 mt-2">Principal</p>
-        <SidebarItem icon={LayoutDashboard} label="Dashboard" to="/" />
-        <SidebarItem icon={Truck} label="Entregas" to="/entregas" />
-        <SidebarItem icon={Fuel} label="Abastecimento" to="/abastecimento" />
-        <SidebarItem icon={Wrench} label="Manutenção" to="/manutencao" />
-        <SidebarItem icon={Receipt} label="Acerto de Viagem" to="/acerto-viagem" />
-        
-        <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 mt-6">Administração</p>
-        <SidebarItem icon={Settings} label="Cadastros" to="/cadastros" />
-        <SidebarItem icon={TrendingUp} label="Relatórios" to="/resumo-geral" />
-        
-        <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 mt-6">Suporte</p>
-        <SidebarItem icon={HelpCircle} label="Ajuda" to="/ajuda" />
-      </nav>
+        {/* Expand button when collapsed */}
+        {isCollapsed && (
+          <div className="flex justify-center py-3 border-b border-gray-100 dark:border-white/5">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleSidebar}
+              className="h-8 w-8 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
 
-      <div className="p-4 border-t border-white/10">
-        <Button variant="ghost" className="w-full justify-start text-slate-400 hover:text-white hover:bg-white/5 gap-3">
-          <LogOut className="h-5 w-5" />
-          Sair
-        </Button>
-      </div>
-    </aside>
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-5 overflow-y-auto">
+          {/* Operação */}
+          <SectionLabel>Operação</SectionLabel>
+          <div className="space-y-1 mb-6">
+            {operationItems.map(item => (
+              <NavLink key={item.to} item={item} />
+            ))}
+          </div>
+
+          {/* Financeiro */}
+          <SectionLabel>Financeiro</SectionLabel>
+          <div className="space-y-1 mb-6">
+            {financeItems.map(item => (
+              <NavLink key={item.to} item={item} />
+            ))}
+          </div>
+
+          {/* Gestão */}
+          <SectionLabel>Gestão</SectionLabel>
+          <div className="space-y-1">
+            {getManagementItems().map(item => (
+              <NavLink key={item.to} item={item} />
+            ))}
+          </div>
+        </nav>
+
+        {/* Footer */}
+        <div className="border-t border-gray-100 dark:border-white/5 p-3 space-y-1">
+          {/* Theme Toggle */}
+          {isCollapsed ? (
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleTheme}
+                  className="w-full h-10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5"
+                >
+                  {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 font-medium">
+                {theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <Button
+              variant="ghost"
+              onClick={toggleTheme}
+              className="w-full justify-start gap-3 h-10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5"
+            >
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              <span className="font-medium text-sm">{theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}</span>
+            </Button>
+          )}
+
+          <Divider />
+
+          {/* Ajuda */}
+          {isCollapsed ? (
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Link
+                  to="/ajuda"
+                  className="flex items-center justify-center h-10 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-200"
+                >
+                  <LifeBuoy className="h-5 w-5" />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 font-medium">
+                Ajuda
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <Link
+              to="/ajuda"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-200"
+            >
+              <LifeBuoy className="h-5 w-5" />
+              <span className="font-medium text-sm">Ajuda</span>
+            </Link>
+          )}
+
+          {/* Sair */}
+          {isCollapsed ? (
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-full h-10 text-gray-500 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10"
+                >
+                  <LogOut className="h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 font-medium">
+                Sair
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 h-10 px-3 text-gray-500 dark:text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="font-medium text-sm">Sair</span>
+            </Button>
+          )}
+        </div>
+      </aside>
+    </TooltipProvider>
   );
 }

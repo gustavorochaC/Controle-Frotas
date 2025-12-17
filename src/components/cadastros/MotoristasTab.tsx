@@ -35,6 +35,26 @@ export function MotoristasTab() {
   const { data: motoristas = [], isLoading } = useMotoristas(true);
   const toggleAtivo = useToggleMotoristaAtivo();
 
+  // Função auxiliar para obter badges de funções
+  const getFuncoesBadges = (motorista: Motorista) => {
+    const badges = [];
+    if (motorista.eh_motorista) {
+      badges.push(
+        <Badge key="motorista" variant="default">
+          Motorista / Condutor
+        </Badge>
+      );
+    }
+    if (motorista.eh_montador) {
+      badges.push(
+        <Badge key="montador" variant="outline" className="border-blue-500 text-blue-500">
+          Montador
+        </Badge>
+      );
+    }
+    return badges;
+  };
+
   // Função auxiliar para obter status de cada motorista
   const getMotoristaStatus = (m: Motorista) => {
     const statusCNH = getStatusVencimento(m.data_vencimento_cnh);
@@ -217,7 +237,7 @@ export function MotoristasTab() {
               <TableHeader>
                 <TableRow className="border-border hover:bg-muted/50">
                   <TableHead className="text-muted-foreground">Nome</TableHead>
-                  <TableHead className="text-muted-foreground">Função</TableHead>
+                  <TableHead className="text-muted-foreground">Funções</TableHead>
                   <TableHead className="text-muted-foreground">CNH</TableHead>
                   <TableHead className="text-muted-foreground">Venc. CNH</TableHead>
                   <TableHead className="text-muted-foreground">Venc. Toxicológico</TableHead>
@@ -241,9 +261,9 @@ export function MotoristasTab() {
                         {motorista.nome}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={motorista.funcao === 'Motorista' ? "default" : "outline"} className={motorista.funcao === 'Condutor' ? 'border-orange-500 text-orange-500' : ''}>
-                          {motorista.funcao || 'Motorista'}
-                        </Badge>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {getFuncoesBadges(motorista)}
+                        </div>
                       </TableCell>
                       <TableCell className="text-foreground">
                         <div className="flex flex-col">

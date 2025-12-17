@@ -19,7 +19,9 @@ export type CategoriaCNH = typeof CATEGORIAS_CNH[number];
 export interface Motorista {
   id: string;
   nome: string;
-  funcao: FuncaoMotorista;
+  funcao?: FuncaoMotorista; // DEPRECATED: Use eh_motorista
+  eh_motorista: boolean;
+  eh_montador: boolean;
   numero_cnh: string | null;
   categoria_cnh: CategoriaCNH | null;
   data_vencimento_cnh: string | null;
@@ -31,7 +33,8 @@ export interface Motorista {
 
 export interface MotoristaFormData {
   nome: string;
-  funcao: FuncaoMotorista;
+  eh_motorista?: boolean;
+  eh_montador?: boolean;
   numero_cnh?: string;
   categoria_cnh?: CategoriaCNH;
   data_vencimento_cnh?: string;

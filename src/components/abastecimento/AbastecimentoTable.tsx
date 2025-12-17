@@ -80,17 +80,22 @@ export function AbastecimentoTable({
                   ? `${abastecimento.cidade} - ${abastecimento.estado}` 
                   : '-'}
               </TableCell>
-              <TableCell className="text-foreground">
+              <TableCell className="text-foreground whitespace-nowrap">
                 {abastecimento.km_inicial?.toLocaleString('pt-BR') || '0'}
               </TableCell>
-              <TableCell className="text-foreground">
-                {abastecimento.litros?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0'}
+              <TableCell className="text-foreground whitespace-nowrap">
+                {abastecimento.litros?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0'}
               </TableCell>
               <TableCell className="text-foreground">
                 {abastecimento.km_por_litro != null ? (
-                  <Badge variant="outline" className="gap-1 font-medium">
-                    <Gauge className="h-3 w-3" />
-                    {abastecimento.km_por_litro.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} km/l
+                  <Badge variant="outline" className="gap-1 font-medium whitespace-nowrap">
+                    <Gauge className="h-3 w-3 flex-shrink-0" />
+                    <span className="whitespace-nowrap">
+                      {abastecimento.km_por_litro.toLocaleString('pt-BR', { 
+                        minimumFractionDigits: 2, 
+                        maximumFractionDigits: 2 
+                      })} km/l
+                    </span>
                   </Badge>
                 ) : (
                   <span className="text-muted-foreground text-sm">N/A</span>
@@ -99,11 +104,11 @@ export function AbastecimentoTable({
               <TableCell className="text-foreground">
                 {abastecimento.produto || '-'}
               </TableCell>
-              <TableCell className="text-foreground">
-                R$ {abastecimento.valor_unitario?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
+              <TableCell className="text-foreground whitespace-nowrap">
+                R$ {abastecimento.valor_unitario?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0,00'}
               </TableCell>
-              <TableCell className="text-foreground font-semibold">
-                R$ {abastecimento.valor_total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
+              <TableCell className="text-foreground font-semibold whitespace-nowrap">
+                R$ {abastecimento.valor_total?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0,00'}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">

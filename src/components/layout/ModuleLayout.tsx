@@ -1,21 +1,20 @@
 import { ReactNode } from 'react';
 import { AppSidebar } from './AppSidebar';
-
-// Tipos dos módulos disponíveis - Mantidos para compatibilidade, mas não estritamente necessários para a sidebar
-type ModuleType = 'entregas' | 'abastecimento' | 'manutencao' | 'resumo-geral' | 'acerto-viagem';
+import { ThemeProvider } from '@/components/theme-provider';
 
 interface ModuleLayoutProps {
   children: ReactNode;
-  module?: ModuleType; // Tornado opcional
 }
 
-export function ModuleLayout({ children, module }: ModuleLayoutProps) {
+export function ModuleLayout({ children }: ModuleLayoutProps) {
   return (
-    <div className="flex h-screen bg-slate-50 font-sans">
-      <AppSidebar module={module} />
-      <main className="flex-1 overflow-y-auto w-full">
-        {children}
-      </main>
-    </div>
+    <ThemeProvider defaultTheme="light" storageKey="scv-ui-theme">
+      <div className="flex h-screen bg-gray-50/90 dark:bg-[#0f1115] font-sans transition-colors duration-300">
+        <AppSidebar />
+        <main className="flex-1 overflow-y-auto">
+          {children}
+        </main>
+      </div>
+    </ThemeProvider>
   );
 }

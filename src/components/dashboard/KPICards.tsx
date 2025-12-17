@@ -7,27 +7,18 @@ interface KPICardsProps {
 }
 
 export function KPICards({ entregas }: KPICardsProps) {
-  const currentMonth = new Date().getMonth();
-  const currentYear = new Date().getFullYear();
-  
-  const entregasDoMes = entregas.filter(e => {
-    if (!e.data_saida) return false;
-    const date = new Date(e.data_saida);
-    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
-  });
+  const totalEntregas = entregas.length;
 
-  const totalEntregas = entregasDoMes.length;
-  
-  const custoTotalEntregas = entregasDoMes.reduce((acc, e) => 
+  const custoTotalEntregas = entregas.reduce((acc, e) =>
     acc + (e.gastos_entrega || 0), 0
   );
-  
-  const custoTotalMontagem = entregasDoMes.reduce((acc, e) => 
+
+  const custoTotalMontagem = entregas.reduce((acc, e) =>
     acc + (e.gastos_montagem || 0), 0
   );
-  
-  const percentualMedioGastos = entregasDoMes.length > 0
-    ? entregasDoMes.reduce((acc, e) => acc + (e.percentual_gastos || 0), 0) / entregasDoMes.length
+
+  const percentualMedioGastos = entregas.length > 0
+    ? entregas.reduce((acc, e) => acc + (e.percentual_gastos || 0), 0) / entregas.length
     : 0;
 
   const formatCurrency = (value: number) => {
@@ -39,10 +30,10 @@ export function KPICards({ entregas }: KPICardsProps) {
 
   const kpis = [
     {
-      title: 'Entregas no Mês',
+      title: 'Total de Entregas',
       value: totalEntregas.toString(),
       icon: Package,
-      description: 'Total de entregas realizadas'
+      description: 'Total de entregas listadas'
     },
     {
       title: 'Custo de Entregas',

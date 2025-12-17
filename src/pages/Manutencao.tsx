@@ -7,8 +7,6 @@ import { ManutencaoFormModal } from '@/components/manutencao/ManutencaoFormModal
 import { DeleteConfirmDialog } from '@/components/dashboard/DeleteConfirmDialog';
 import { TablePrintModal, TableColumn } from '@/components/shared/TablePrintModal';
 import { ModuleLayout } from '@/components/layout/ModuleLayout';
-import { TiposManutencaoSection } from '@/components/manutencao/TiposManutencaoSection';
-import { AlertasManutencaoSection } from '@/components/manutencao/AlertasManutencaoSection';
 import { format } from 'date-fns';
 import {
   useManutencoes,
@@ -16,7 +14,6 @@ import {
   useUpdateManutencao,
   useDeleteManutencao,
 } from '@/hooks/useManutencoes';
-import { AlertaManutencao } from '@/hooks/useAlertasManutencao';
 import type { Manutencao as ManutencaoType, ManutencaoFormData, TipoManutencao } from '@/types/manutencao';
 
 const Manutencao = () => {
@@ -31,11 +28,10 @@ const Manutencao = () => {
   const [manutencaoToDelete, setManutencaoToDelete] = useState<ManutencaoType | null>(null);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   
-  // Valores padrão para o formulário (usados ao registrar via alerta)
+  // Valores padrão para o formulário
   const [defaultFormValues, setDefaultFormValues] = useState<{
     tipo?: TipoManutencao;
     veiculoId?: string;
-    configId?: string;
     tipoServico?: string;
   }>({});
 
@@ -51,17 +47,6 @@ const Manutencao = () => {
     setIsFormOpen(false);
   };
 
-  // Registrar manutenção a partir de um alerta
-  const handleRegistrarFromAlerta = (alerta: AlertaManutencao) => {
-    setSelectedManutencao(null);
-    setDefaultFormValues({
-      tipo: 'preventiva',
-      veiculoId: alerta.veiculo_id,
-      configId: alerta.id,
-      tipoServico: alerta.nome_servico,
-    });
-    setIsFormOpen(true);
-  };
 
   const handleSubmit = (data: ManutencaoFormData) => {
     if (selectedManutencao) {
@@ -165,9 +150,6 @@ const Manutencao = () => {
         </div>
 
         <div className="space-y-6">
-          {/* Alertas de Manutenção */}
-          <AlertasManutencaoSection onRegistrarManutencao={handleRegistrarFromAlerta} />
-
           {/* Cards de resumo */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card className="bg-card border-border shadow-sm">
@@ -227,9 +209,6 @@ const Manutencao = () => {
             </Card>
           </div>
 
-          {/* Seção de Tipos de Manutenção Preventiva */}
-          <TiposManutencaoSection />
-
           {/* Tabela de manutenções */}
           <Card className="bg-card border-border shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-border/50 mb-4">
@@ -276,7 +255,6 @@ const Manutencao = () => {
           isLoading={createManutencao.isPending || updateManutencao.isPending}
           defaultTipo={defaultFormValues.tipo}
           defaultVeiculoId={defaultFormValues.veiculoId}
-          defaultConfigId={defaultFormValues.configId}
           defaultTipoServico={defaultFormValues.tipoServico}
         />
 

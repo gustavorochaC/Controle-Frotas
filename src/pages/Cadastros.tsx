@@ -2,10 +2,16 @@ import { Truck, Users, Car, Wrench } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MotoristasTab } from '@/components/cadastros/MotoristasTab';
 import { VeiculosTab } from '@/components/cadastros/VeiculosTab';
-import { MontadoresTab } from '@/components/cadastros/MontadoresTab';
 import { ModuleLayout } from '@/components/layout/ModuleLayout';
+import { useMotoristas } from '@/hooks/useMotoristas';
+import { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 const Cadastros = () => {
+  const { data: motoristas = [] } = useMotoristas(true);
+  const montadores = motoristas.filter(m => m.eh_montador && m.ativo);
+
   return (
     <ModuleLayout>
       <div className="p-8 lg:p-10 space-y-8">
@@ -30,7 +36,7 @@ const Cadastros = () => {
             </TabsTrigger>
             <TabsTrigger value="montadores" className="gap-2 data-[state=active]:bg-slate-100 data-[state=active]:text-slate-900">
               <Wrench className="h-4 w-4" />
-              Montadores
+              Montadores ({montadores.length})
             </TabsTrigger>
           </TabsList>
 
@@ -43,7 +49,39 @@ const Cadastros = () => {
           </TabsContent>
 
           <TabsContent value="montadores" className="mt-6">
-            <MontadoresTab />
+            <Card className="bg-card border-border">
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-foreground">Montadores</h3>
+                    <Badge variant="outline">{montadores.length} cadastrado(s)</Badge>
+                  </div>
+                  {montadores.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">
+                      Nenhum montador cadastrado. Para cadastrar um montador, vá para a aba "Motoristas / Condutores" e marque a opção "Também é montador" ao criar ou editar um cadastro.
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {montadores.map((m) => (
+                        <div key={m.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <span className="font-medium text-foreground">{m.nome}</span>
+                            {m.eh_motorista && (
+                              <Badge variant="default">
+                                Motorista / Condutor
+                              </Badge>
+                            )}
+                            <Badge variant="outline" className="border-blue-500 text-blue-500">
+                              Montador
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

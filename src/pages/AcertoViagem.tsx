@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Plus, Search, FileText, Printer } from 'lucide-react';
 import { ModuleLayout } from '@/components/layout/ModuleLayout';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,13 @@ const AcertoViagemPage = () => {
   const [isTablePrintModalOpen, setIsTablePrintModalOpen] = useState(false);
   const [selectedAcerto, setSelectedAcerto] = useState<AcertoViagem | null>(null);
 
-  const { data: acertos = [], isLoading } = useAcertosViagem();
+  const { data: acertos = [], isLoading, error, isError } = useAcertosViagem();
+
+  // #region agent log
+  useEffect(() => {
+    fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AcertoViagem.tsx:23',message:'Estado da query',data:{isLoading,isError,errorMessage:error?.message,acertosLength:acertos.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+  }, [isLoading, isError, error, acertos.length]);
+  // #endregion
 
   // Filtrar acertos
   const filteredAcertos = acertos.filter(acerto => {

@@ -6,7 +6,6 @@ export interface AcertoViagem {
   // Relacionamentos
   veiculo_id: string | null;
   motorista_id: string | null;
-  montador_id: string | null;
   
   // Dados da viagem
   destino: string;
@@ -72,7 +71,6 @@ export interface AcertoViagemEntrega {
 export interface AcertoViagemFormData {
   veiculo_id: string;
   motorista_id: string | null;
-  montador_id: string | null;
   destino: string;
   data_saida: string;
   data_chegada: string;

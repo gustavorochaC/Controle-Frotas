@@ -15,7 +15,6 @@ export interface Manutencao {
   tipo_manutencao: TipoManutencao;
   status: StatusManutencao;
   problema_detectado: string | null;
-  config_preventiva_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -32,31 +31,6 @@ export interface ManutencaoFormData {
   tipo_manutencao: TipoManutencao;
   status: StatusManutencao;
   problema_detectado?: string;
-  config_preventiva_id?: string;
-}
-
-// Configuração de manutenção preventiva por veículo
-export interface ManutencaoPreventivConfig {
-  id: string;
-  veiculo_id: string;
-  veiculo_placa?: string;
-  nome_servico: string;
-  intervalo_km: number;
-  margem_alerta_km: number;
-  km_ultima_manutencao: number | null;
-  km_proxima_manutencao: number | null;
-  aguardando_primeira_manutencao: boolean;
-  ativo: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ManutencaoPreventivConfigFormData {
-  veiculo_id: string;
-  nome_servico: string;
-  intervalo_km: number;
-  margem_alerta_km: number;
-  km_ultima_manutencao?: number;
 }
 
 // Constantes

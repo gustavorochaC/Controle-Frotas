@@ -13,6 +13,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { useMontadores, useToggleMontadorAtivo } from '@/hooks/useMontadores';
+import { useMotoristas } from '@/hooks/useMotoristas';
 import { MontadorFormModal } from './MontadorFormModal';
 import { Montador } from '@/types/montador';
 import { cn } from '@/lib/utils';
@@ -23,7 +24,14 @@ export function MontadoresTab() {
   const [selectedMontador, setSelectedMontador] = useState<Montador | null>(null);
   
   const { data: montadores = [], isLoading } = useMontadores(true);
+  const { data: motoristas = [] } = useMotoristas(true);
   const toggleAtivo = useToggleMontadorAtivo();
+
+  // Função auxiliar para verificar se montador também é motorista
+  const montadorTambemMotorista = (nome: string): boolean => {
+    const nomeLower = nome.toLowerCase().trim();
+    return motoristas.some(m => m.nome.toLowerCase().trim() === nomeLower && m.ativo);
+  };
 
   const filteredMontadores = showInactive 
     ? montadores 
@@ -96,7 +104,14 @@ export function MontadoresTab() {
                   )}
                 >
                   <TableCell className="font-medium text-foreground">
-                    {montador.nome}
+                    <div className="flex items-center gap-2">
+                      <span>{montador.nome}</span>
+                      {montadorTambemMotorista(montador.nome) && (
+                        <Badge variant="outline" className="text-xs border-blue-500 text-blue-500">
+                          também motorista
+                        </Badge>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <Badge variant={montador.ativo ? "default" : "secondary"}>

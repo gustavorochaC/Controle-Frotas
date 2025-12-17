@@ -36,16 +36,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { Manutencao, ManutencaoFormData, ManutencaoPreventivConfig, TipoManutencao, StatusManutencao, STATUS_MANUTENCAO_LABELS, TIPO_MANUTENCAO_LABELS } from '@/types/manutencao';
+import { Manutencao, ManutencaoFormData, TipoManutencao, StatusManutencao, STATUS_MANUTENCAO_LABELS, TIPO_MANUTENCAO_LABELS } from '@/types/manutencao';
 import { useVeiculos } from '@/hooks/useVeiculos';
-import { useManutencaoPreventivConfig } from '@/hooks/useManutencaoPreventiva';
 
 const formSchema = z.object({
   data: z.date({ required_error: 'Data é obrigatória' }),
   veiculo_id: z.string().min(1, 'Veículo é obrigatório'),
   tipo_manutencao: z.enum(['preventiva', 'corretiva']),
   status: z.enum(['pendente', 'em_andamento', 'resolvida']),
-  config_preventiva_id: z.string().optional(),
   estabelecimento: z.string().min(1, 'Estabelecimento é obrigatório'),
   tipo_servico: z.string().min(1, 'Tipo de serviço é obrigatório'),
   descricao_servico: z.string().optional(),
@@ -65,7 +63,6 @@ interface ManutencaoFormModalProps {
   isLoading: boolean;
   defaultTipo?: TipoManutencao;
   defaultVeiculoId?: string;
-  defaultConfigId?: string;
   defaultTipoServico?: string;
 }
 
@@ -77,11 +74,9 @@ export function ManutencaoFormModal({
   isLoading,
   defaultTipo,
   defaultVeiculoId,
-  defaultConfigId,
   defaultTipoServico,
 }: ManutencaoFormModalProps) {
   const { data: veiculos = [] } = useVeiculos();
-  const { data: configsPreventivas = [] } = useManutencaoPreventivConfig();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -90,7 +85,6 @@ export function ManutencaoFormModal({
       veiculo_id: '',
       tipo_manutencao: 'corretiva',
       status: 'pendente',
-      config_preventiva_id: '',
       estabelecimento: '',
       tipo_servico: '',
       descricao_servico: '',
@@ -104,11 +98,6 @@ export function ManutencaoFormModal({
   const tipoManutencao = form.watch('tipo_manutencao');
   const veiculoId = form.watch('veiculo_id');
 
-  // Filtrar configs preventivas pelo veículo selecionado
-  const configsDoVeiculo = configsPreventivas.filter(
-    (c) => c.veiculo_id === veiculoId
-  );
-
   useEffect(() => {
     if (manutencao) {
       form.reset({
@@ -116,7 +105,6 @@ export function ManutencaoFormModal({
         veiculo_id: manutencao.veiculo_id || '',
         tipo_manutencao: manutencao.tipo_manutencao || 'corretiva',
         status: manutencao.status || 'pendente',
-        config_preventiva_id: manutencao.config_preventiva_id || '',
         estabelecimento: manutencao.estabelecimento || '',
         tipo_servico: manutencao.tipo_servico || '',
         descricao_servico: manutencao.descricao_servico || '',
@@ -133,7 +121,6 @@ export function ManutencaoFormModal({
         veiculo_id: defaultVeiculoId || '',
         tipo_manutencao: defaultTipo || 'corretiva',
         status: 'pendente',
-        config_preventiva_id: defaultConfigId || '',
         estabelecimento: '',
         tipo_servico: defaultTipoServico || '',
         descricao_servico: '',
@@ -143,7 +130,7 @@ export function ManutencaoFormModal({
         nota_fiscal: '',
       });
     }
-  }, [manutencao, form, defaultTipo, defaultVeiculoId, defaultConfigId, defaultTipoServico, veiculos]);
+  }, [manutencao, form, defaultTipo, defaultVeiculoId, defaultTipoServico, veiculos]);
 
   // Atualizar KM quando veículo mudar
   useEffect(() => {
@@ -155,22 +142,12 @@ export function ManutencaoFormModal({
     }
   }, [veiculoId, veiculos, manutencao, form]);
 
-  // Ao selecionar config preventiva, preencher tipo_servico
-  const handleConfigChange = (configId: string) => {
-    form.setValue('config_preventiva_id', configId);
-    const config = configsPreventivas.find((c) => c.id === configId);
-    if (config) {
-      form.setValue('tipo_servico', config.nome_servico);
-    }
-  };
-
   const handleSubmit = (data: FormData) => {
     const formattedData = {
       data: format(data.data, 'yyyy-MM-dd'),
       veiculo_id: data.veiculo_id,
       tipo_manutencao: data.tipo_manutencao,
       status: data.status,
-      config_preventiva_id: data.tipo_manutencao === 'preventiva' ? data.config_preventiva_id || null : null,
       estabelecimento: data.estabelecimento,
       tipo_servico: data.tipo_servico,
       descricao_servico: data.descricao_servico || null,
@@ -313,34 +290,6 @@ export function ManutencaoFormModal({
                 )}
               />
             </div>
-
-            {/* Campo condicional para Manutenção Preventiva */}
-            {tipoManutencao === 'preventiva' && veiculoId && configsDoVeiculo.length > 0 && (
-              <FormField
-                control={form.control}
-                name="config_preventiva_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-foreground">Tipo de Manutenção Preventiva</FormLabel>
-                    <Select onValueChange={handleConfigChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="bg-background border-input">
-                          <SelectValue placeholder="Selecione o tipo configurado" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {configsDoVeiculo.map((config) => (
-                          <SelectItem key={config.id} value={config.id}>
-                            {config.nome_servico} (a cada {config.intervalo_km.toLocaleString('pt-BR')} km)
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
 
             {/* Campo condicional para Manutenção Corretiva */}
             {tipoManutencao === 'corretiva' && (

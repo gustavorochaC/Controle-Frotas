@@ -10,8 +10,10 @@ import Manutencao from "./pages/Manutencao";
 import Cadastros from "./pages/Cadastros";
 import ResumoGeral from "./pages/ResumoGeral";
 import AcertoViagem from "./pages/AcertoViagem";
+import Importacao from "./pages/Importacao";
 import Ajuda from "./pages/Ajuda";
 import NotFound from "./pages/NotFound";
+import { isImportEnabled } from "@/utils/featureFlags";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +31,7 @@ const App = () => (
           <Route path="/cadastros" element={<Cadastros />} />
           <Route path="/resumo-geral" element={<ResumoGeral />} />
           <Route path="/acerto-viagem" element={<AcertoViagem />} />
+          {isImportEnabled() && <Route path="/importacao" element={<Importacao />} />}
           <Route path="/ajuda" element={<Ajuda />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

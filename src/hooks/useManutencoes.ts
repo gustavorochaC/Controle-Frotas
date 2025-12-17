@@ -17,7 +17,6 @@ type ManutencaoComRelacionamentos = {
   tipo_manutencao: string;
   status: string;
   problema_detectado: string | null;
-  config_preventiva_id: string | null;
   created_at: string;
   updated_at: string;
   veiculo: { placa: string } | null;
@@ -63,34 +62,10 @@ export function useCreateManutencao() {
 
       if (error) throw error;
       
-      // Se for manutenção preventiva com config_preventiva_id, atualizar a config
-      if (manutencao.tipo_manutencao === 'preventiva' && manutencao.config_preventiva_id) {
-        // Buscar config atual
-        const { data: config } = await supabase
-          .from('manutencoes_preventivas_config')
-          .select('intervalo_km')
-          .eq('id', manutencao.config_preventiva_id)
-          .single();
-        
-        if (config) {
-          // Atualizar km_ultima, km_proxima e marcar que não está mais aguardando
-          await supabase
-            .from('manutencoes_preventivas_config')
-            .update({
-              km_ultima_manutencao: manutencao.km_manutencao,
-              km_proxima_manutencao: manutencao.km_manutencao + config.intervalo_km,
-              aguardando_primeira_manutencao: false,
-            })
-            .eq('id', manutencao.config_preventiva_id);
-        }
-      }
-      
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['manutencoes'] });
-      queryClient.invalidateQueries({ queryKey: ['manutencoes_preventivas_config'] });
-      queryClient.invalidateQueries({ queryKey: ['alertas_manutencao'] });
       toast({
         title: 'Sucesso',
         description: 'Manutenção registrada com sucesso!',

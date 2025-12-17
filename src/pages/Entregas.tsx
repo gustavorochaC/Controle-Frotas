@@ -21,10 +21,10 @@ const Entregas = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [motoristaFilter, setMotoristaFilter] = useState('all');
-  
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedEntrega, setSelectedEntrega] = useState<Entrega | null>(null);
-  
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [entregaToDelete, setEntregaToDelete] = useState<Entrega | null>(null);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
@@ -40,42 +40,104 @@ const Entregas = () => {
 
   const filteredEntregas = useMemo(() => {
     return entregas.filter(entrega => {
-      const matchesSearch = 
+      const matchesSearch =
         searchTerm === '' ||
         entrega.cliente?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entrega.nf?.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesStatus = 
-        statusFilter === 'all' || 
+        entrega.pv_foco?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStatus =
+        statusFilter === 'all' ||
         entrega.status === statusFilter;
-      
-      const matchesMotorista = 
-        motoristaFilter === 'all' || 
+
+      const matchesMotorista =
+        motoristaFilter === 'all' ||
         entrega.motorista === motoristaFilter;
 
       return matchesSearch && matchesStatus && matchesMotorista;
     });
   }, [entregas, searchTerm, statusFilter, motoristaFilter]);
 
-  // Configuração de colunas para impressão
+  // Configuração de colunas para impressão - TODOS os campos cadastrados
   const printColumns: TableColumn<Entrega>[] = useMemo(() => [
+    // Dados do Pedido
+    { key: 'pv_foco', label: 'PV Foco' },
     { key: 'nf', label: 'NF' },
     { key: 'cliente', label: 'Cliente' },
     { key: 'uf', label: 'UF' },
-    { 
-      key: 'data_saida', 
-      label: 'Data Saída',
-      render: (value) => value ? format(new Date(value), 'dd/MM/yyyy') : '-'
-    },
-    { key: 'motorista', label: 'Motorista' },
-    { key: 'tipo_transporte', label: 'Tipo' },
-    { 
-      key: 'valor', 
+    {
+      key: 'valor',
       label: 'Valor',
       render: (value) => value ? `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-',
       className: 'text-right'
     },
     { key: 'status', label: 'Status' },
+    // Dados do Transporte
+    {
+      key: 'data_saida',
+      label: 'Data Saída',
+      render: (value) => {
+        if (!value) return '-';
+        // Parse string ISO (YYYY-MM-DD) diretamente sem conversão de timezone
+        const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (match) {
+          const [, year, month, day] = match;
+          return `${day}/${month}/${year}`;
+        }
+        return format(new Date(value + 'T12:00:00'), 'dd/MM/yyyy');
+      }
+    },
+    { key: 'motorista', label: 'Motorista' },
+    { key: 'carro', label: 'Veículo' },
+    { key: 'tipo_transporte', label: 'Tipo Transporte' },
+    // Montagem
+    {
+      key: 'precisa_montagem',
+      label: 'Precisa Montagem',
+      render: (value) => value ? 'SIM' : 'NÃO'
+    },
+    {
+      key: 'data_montagem',
+      label: 'Data Montagem',
+      render: (value) => {
+        if (!value) return '-';
+        // Parse string ISO (YYYY-MM-DD) diretamente sem conversão de timezone
+        const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (match) {
+          const [, year, month, day] = match;
+          return `${day}/${month}/${year}`;
+        }
+        return format(new Date(value + 'T12:00:00'), 'dd/MM/yyyy');
+      }
+    },
+    { key: 'montador_1', label: 'Montador 1' },
+    { key: 'montador_2', label: 'Montador 2' },
+    // Custos
+    {
+      key: 'gastos_entrega',
+      label: 'Gastos Entrega',
+      render: (value) => value ? `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-',
+      className: 'text-right'
+    },
+    {
+      key: 'gastos_montagem',
+      label: 'Gastos Montagem',
+      render: (value) => value ? `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-',
+      className: 'text-right'
+    },
+    {
+      key: 'produtividade',
+      label: 'Produtividade',
+      render: (value) => value ? value.toString() : '-'
+    },
+    {
+      key: 'percentual_gastos',
+      label: '% Gastos',
+      render: (value) => value ? `${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}%` : '-',
+      className: 'text-right'
+    },
+    // Observações
+    { key: 'erros', label: 'Erros' },
+    { key: 'descricao_erros', label: 'Descrição dos Erros' },
   ], []);
 
   // Texto descritivo dos filtros aplicados
@@ -100,12 +162,12 @@ const Entregas = () => {
   const handleSubmit = (data: Partial<EntregaFormData> & { montadores?: string; montador_1?: string; montador_2?: string; data_saida?: Date; data_montagem?: Date }) => {
     // Remover o campo 'montadores' pois o banco usa montador_1 e montador_2
     const { montadores, ...restData } = data;
-    
+
     const formattedData = {
       ...restData,
       data_saida: data.data_saida ? format(data.data_saida, 'yyyy-MM-dd') : null,
       data_montagem: data.data_montagem ? format(data.data_montagem, 'yyyy-MM-dd') : null,
-      percentual_gastos: data.valor && data.gastos_entrega 
+      percentual_gastos: data.valor && data.gastos_entrega
         ? ((data.gastos_entrega / data.valor) * 100)
         : 0,
     };
@@ -165,8 +227,8 @@ const Entregas = () => {
         </div>
 
         <div className="space-y-6">
-          <KPICards entregas={entregas} />
-          
+          <KPICards entregas={filteredEntregas} />
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <EntregaFilters
@@ -178,8 +240,8 @@ const Entregas = () => {
                 onMotoristaChange={setMotoristaFilter}
                 motoristas={motoristas}
               />
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => setIsPrintModalOpen(true)}
                 className="gap-2"
               >
@@ -187,7 +249,7 @@ const Entregas = () => {
                 Imprimir / PDF
               </Button>
             </div>
-            
+
             <EntregaTable
               entregas={filteredEntregas}
               onEdit={handleOpenForm}

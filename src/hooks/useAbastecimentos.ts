@@ -26,7 +26,7 @@ type AbastecimentoComRelacionamentos = {
 };
 
 // Função auxiliar para buscar o último abastecimento do veículo
-async function getUltimoAbastecimento(veiculoId: string, excludeId?: string): Promise<{ km_inicial: number } | null> {
+export async function getUltimoAbastecimento(veiculoId: string, excludeId?: string): Promise<{ km_inicial: number } | null> {
   let query = supabase
     .from('abastecimentos')
     .select('km_inicial')
@@ -34,53 +34,61 @@ async function getUltimoAbastecimento(veiculoId: string, excludeId?: string): Pr
     .order('data', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(1);
-  
+
   if (excludeId) {
     query = query.neq('id', excludeId);
   }
-  
+
   const { data, error } = await query;
-  
+
   if (error || !data || data.length === 0) {
     return null;
   }
-  
+
   return data[0];
 }
 
 // Função para calcular KM/L
-function calcularKmPorLitro(kmAtual: number, kmAnterior: number | null, litros: number): number | null {
+// Parâmetro showToast: se false, não exibe toast de aviso (útil para importações em lote)
+export function calcularKmPorLitro(
+  kmAtual: number,
+  kmAnterior: number | null,
+  litros: number,
+  showToast: boolean = true
+): number | null {
   if (kmAnterior === null) {
     return null; // Primeiro abastecimento do veículo
   }
-  
+
   if (kmAtual < kmAnterior) {
-    sonnerToast.warning('Atenção: KM Inválido', {
-      description: `O KM informado (${kmAtual.toLocaleString('pt-BR')}) é menor que o último registro (${kmAnterior.toLocaleString('pt-BR')}). Verifique se está correto.`,
-      duration: 6000,
-    });
+    if (showToast) {
+      sonnerToast.warning('Atenção: KM Inválido', {
+        description: `O KM informado (${kmAtual.toLocaleString('pt-BR')}) é menor que o último registro (${kmAnterior.toLocaleString('pt-BR')}). Verifique se está correto.`,
+        duration: 6000,
+      });
+    }
     return null;
   }
-  
+
   if (litros <= 0) {
     return null;
   }
-  
+
   const kmRodado = kmAtual - kmAnterior;
   const kmPorLitro = kmRodado / litros;
-  
+
   return Math.round(kmPorLitro * 100) / 100; // 2 casas decimais
 }
 
 // Função para atualizar KM atual do veículo
-async function atualizarKmAtualVeiculo(veiculoId: string, kmInicial: number) {
+export async function atualizarKmAtualVeiculo(veiculoId: string, kmInicial: number) {
   // Buscar o KM atual do veículo
   const { data: veiculo } = await supabase
     .from('veiculos')
     .select('km_atual')
     .eq('id', veiculoId)
     .single();
-  
+
   // Só atualiza se o novo KM for maior que o atual
   if (!veiculo || kmInicial > (veiculo.km_atual || 0)) {
     await supabase
@@ -101,10 +109,11 @@ export function useAbastecimentos() {
           veiculos:veiculo_id(placa, modelo),
           motoristas:condutor_id(nome)
         `)
-        .order('data', { ascending: false });
-      
+        .order('data', { ascending: false })
+        .range(0, 9999);
+
       if (error) throw error;
-      
+
       // Formatar dados para incluir informações do veículo e condutor
       const typedData = data as unknown as AbastecimentoComRelacionamentos[];
       return typedData.map((item) => ({
@@ -127,18 +136,18 @@ export function useCreateAbastecimento() {
       const ultimoAbastecimento = await getUltimoAbastecimento(abastecimento.veiculo_id);
       const kmAnterior = ultimoAbastecimento?.km_inicial || null;
       const kmPorLitro = calcularKmPorLitro(abastecimento.km_inicial, kmAnterior, abastecimento.litros);
-      
+
       const { data, error } = await supabase
         .from('abastecimentos')
         .insert([{ ...abastecimento, km_por_litro: kmPorLitro }])
         .select()
         .single();
-      
+
       if (error) throw error;
-      
+
       // Atualizar KM atual do veículo automaticamente
       await atualizarKmAtualVeiculo(abastecimento.veiculo_id, abastecimento.km_inicial);
-      
+
       return data;
     },
     onSuccess: () => {
@@ -169,19 +178,19 @@ export function useUpdateAbastecimento() {
       const ultimoAbastecimento = await getUltimoAbastecimento(data.veiculo_id, id);
       const kmAnterior = ultimoAbastecimento?.km_inicial || null;
       const kmPorLitro = calcularKmPorLitro(data.km_inicial, kmAnterior, data.litros);
-      
+
       const { data: result, error } = await supabase
         .from('abastecimentos')
         .update({ ...data, km_por_litro: kmPorLitro })
         .eq('id', id)
         .select()
         .single();
-      
+
       if (error) throw error;
-      
+
       // Atualizar KM atual do veículo automaticamente
       await atualizarKmAtualVeiculo(data.veiculo_id, data.km_inicial);
-      
+
       return result;
     },
     onSuccess: () => {
@@ -212,7 +221,7 @@ export function useDeleteAbastecimento() {
         .from('abastecimentos')
         .delete()
         .eq('id', id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {

@@ -20,10 +20,10 @@ const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [motoristaFilter, setMotoristaFilter] = useState('all');
-  
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedEntrega, setSelectedEntrega] = useState<Entrega | null>(null);
-  
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [entregaToDelete, setEntregaToDelete] = useState<Entrega | null>(null);
 
@@ -38,17 +38,17 @@ const Index = () => {
 
   const filteredEntregas = useMemo(() => {
     return entregas.filter(entrega => {
-      const matchesSearch = 
+      const matchesSearch =
         searchTerm === '' ||
         entrega.cliente?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entrega.nf?.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesStatus = 
-        statusFilter === 'all' || 
+        entrega.pv_foco?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStatus =
+        statusFilter === 'all' ||
         entrega.status === statusFilter;
-      
-      const matchesMotorista = 
-        motoristaFilter === 'all' || 
+
+      const matchesMotorista =
+        motoristaFilter === 'all' ||
         entrega.motorista === motoristaFilter;
 
       return matchesSearch && matchesStatus && matchesMotorista;
@@ -70,7 +70,7 @@ const Index = () => {
       ...data,
       data_saida: data.data_saida ? format(data.data_saida, 'yyyy-MM-dd') : null,
       data_montagem: data.data_montagem ? format(data.data_montagem, 'yyyy-MM-dd') : null,
-      percentual_gastos: data.valor && data.gastos_entrega 
+      percentual_gastos: data.valor && data.gastos_entrega
         ? ((data.gastos_entrega / data.valor) * 100)
         : 0,
     };
@@ -153,8 +153,8 @@ const Index = () => {
       </header>
 
       <main className="container mx-auto px-4 py-6 space-y-6">
-        <KPICards entregas={entregas} />
-        
+        <KPICards entregas={filteredEntregas} />
+
         <div className="space-y-4">
           <EntregaFilters
             searchTerm={searchTerm}
@@ -165,7 +165,7 @@ const Index = () => {
             onMotoristaChange={setMotoristaFilter}
             motoristas={motoristas}
           />
-          
+
           <EntregaTable
             entregas={filteredEntregas}
             onEdit={handleOpenForm}

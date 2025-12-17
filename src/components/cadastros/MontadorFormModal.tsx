@@ -103,6 +103,11 @@ export function MontadorFormModal({
               )}
             />
 
+            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm text-blue-800 dark:text-blue-200">
+              <p className="font-medium mb-1">💡 Dica</p>
+              <p>Esta pessoa também pode ser cadastrada como motorista/condutor. Basta criar um novo cadastro de motorista com o mesmo nome.</p>
+            </div>
+
             <div className="flex justify-end gap-2 pt-4">
               <Button
                 type="button"

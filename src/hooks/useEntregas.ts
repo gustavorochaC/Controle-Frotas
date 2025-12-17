@@ -13,6 +13,12 @@ export function useEntregas() {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
+      // #region agent log
+      if (data && data.length > 0) {
+        const sample = data[0];
+        fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useEntregas.ts:useEntregas',message:'dados recuperados do banco',data:{sampleDataSaida:sample?.data_saida,samplePvFoco:sample?.pv_foco,totalRecords:data.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+      }
+      // #endregion
       return data as Entrega[];
     }
   });

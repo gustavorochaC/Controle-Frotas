@@ -216,7 +216,11 @@ export function EntregaFormModal({
                     <FormItem>
                       <FormLabel>Nota Fiscal</FormLabel>
                       <FormControl>
-                        <Input {...field} className="bg-background border-border" />
+                        <Input 
+                          {...field} 
+                          className="bg-background border-border" 
+                          placeholder="Número da NF ou DECLARAÇÃO"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

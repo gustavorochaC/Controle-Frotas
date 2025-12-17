@@ -22,9 +22,8 @@ export interface VeiculoFormData {
 }
 
 export const TIPOS_VEICULO = [
-  'Carro',
-  'Van',
-  'Caminhão',
-  'Moto',
-  'Utilitário',
+  'Leve',
+  'Semipesado',
+  'Pesado',
+  'Simples',
 ] as const;

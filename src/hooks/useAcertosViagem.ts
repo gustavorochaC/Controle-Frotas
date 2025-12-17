@@ -58,26 +58,69 @@ export function useAcertosViagem() {
   return useQuery({
     queryKey: ['acertos_viagem'],
     queryFn: async () => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useAcertosViagem.ts:60',message:'Query iniciada',data:{timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      // Buscar acertos sem join com montadores (causa erro no Supabase)
       const { data, error } = await supabase
         .from('acertos_viagem')
         .select(`
           *,
           veiculos:veiculo_id (placa, modelo),
-          motoristas:motorista_id (nome),
-          montadores:montador_id (nome)
+          motoristas:motorista_id (nome)
         `)
         .order('data_saida', { ascending: false });
 
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useAcertosViagem.ts:72',message:'Query resultado',data:{hasError:!!error,errorMessage:error?.message,dataLength:data?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+
       if (error) throw error;
 
+      // Buscar nomes dos montadores separadamente se houver montador_id
       const typedData = data as unknown as AcertoComRelacionamentos[];
-      return (typedData || []).map((item) => ({
+      const montadorIds = [...new Set(typedData.filter(item => item.montador_id).map(item => item.montador_id))] as string[];
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useAcertosViagem.ts:82',message:'Processando montadores',data:{typedDataLength:typedData.length,montadorIdsCount:montadorIds.length,montadorIdsSample:montadorIds.slice(0,3)},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      
+      let montadoresMap: Record<string, string> = {};
+      if (montadorIds.length > 0) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useAcertosViagem.ts:88',message:'Buscando montadores separadamente',data:{montadorIdsCount:montadorIds.length},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+        
+        const { data: montadores, error: montadoresError } = await supabase
+          .from('montadores')
+          .select('id, nome')
+          .in('id', montadorIds);
+        
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useAcertosViagem.ts:96',message:'Montadores buscados',data:{hasError:!!montadoresError,errorMessage:montadoresError?.message,montadoresLength:montadores?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+        
+        if (!montadoresError && montadores) {
+          montadoresMap = montadores.reduce((acc, m) => {
+            acc[m.id] = m.nome;
+            return acc;
+          }, {} as Record<string, string>);
+        }
+      }
+
+      const result = (typedData || []).map((item) => ({
         ...item,
         veiculo_placa: item.veiculos?.placa,
         veiculo_modelo: item.veiculos?.modelo,
         motorista_nome: item.motoristas?.nome,
-        montador_nome: item.montadores?.nome,
+        montador_nome: item.montador_id ? montadoresMap[item.montador_id] : undefined,
       })) as AcertoViagem[];
+
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useAcertosViagem.ts:81',message:'Query finalizada',data:{resultLength:result.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+
+      return result;
     },
   });
 }
@@ -93,8 +136,7 @@ export function useAcertoViagem(id: string | null) {
         .select(`
           *,
           veiculos:veiculo_id (placa, modelo),
-          motoristas:motorista_id (nome),
-          montadores:montador_id (nome)
+          motoristas:motorista_id (nome, eh_montador)
         `)
         .eq('id', id)
         .single();
@@ -115,13 +157,12 @@ export function useAcertoViagem(id: string | null) {
 
       const typedAcerto = acerto as unknown as AcertoComRelacionamentos;
       const typedEntregas = entregas as unknown as EntregaComRelacionamento[];
-      
+
       return {
         ...typedAcerto,
         veiculo_placa: typedAcerto.veiculos?.placa,
         veiculo_modelo: typedAcerto.veiculos?.modelo,
         motorista_nome: typedAcerto.motoristas?.nome,
-        montador_nome: typedAcerto.montadores?.nome,
         entregas: typedEntregas?.map((e): AcertoViagemEntrega => ({
           id: e.id,
           acerto_id: e.acerto_id,
@@ -146,23 +187,44 @@ export function useEntregasDisponiveis() {
   return useQuery({
     queryKey: ['entregas_disponiveis_acerto'],
     queryFn: async () => {
-      const { data: vinculadas } = await supabase
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useEntregasDisponiveis.ts:146',message:'Query entregas iniciada',data:{timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+      const { data: vinculadas, error: vinculadasError } = await supabase
         .from('acerto_viagem_entregas')
         .select('entrega_id');
 
-      const idsVinculados = (vinculadas || []).map((v) => v.entrega_id) || [];
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useEntregasDisponiveis.ts:151',message:'Vinculadas carregadas',data:{hasError:!!vinculadasError,errorMessage:vinculadasError?.message,vinculadasLength:vinculadas?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
 
-      let query = supabase
+      if (vinculadasError) throw vinculadasError;
+
+      const idsVinculados = (vinculadas || []).map((v) => v.entrega_id) || [];
+      const idsVinculadosSet = new Set(idsVinculados);
+
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useEntregasDisponiveis.ts:158',message:'IDs vinculados',data:{idsVinculadosLength:idsVinculados.length,idsVinculadosSample:idsVinculados.slice(0,3)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+
+      // Buscar todas as entregas e filtrar no JavaScript (mais seguro que usar .not com múltiplos IDs)
+      const { data: todasEntregas, error } = await supabase
         .from('controle_entregas')
         .select('id, pv_foco, cliente, uf, valor, data_saida, motorista, carro')
         .order('data_saida', { ascending: false });
 
-      if (idsVinculados.length > 0) {
-        query = query.not('id', 'in', `(${idsVinculados.join(',')})`);
-      }
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useEntregasDisponiveis.ts:168',message:'Todas entregas carregadas',data:{hasError:!!error,errorMessage:error?.message,errorCode:error?.code,todasEntregasLength:todasEntregas?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
 
-      const { data, error } = await query;
       if (error) throw error;
+
+      // Filtrar entregas não vinculadas
+      const data = (todasEntregas || []).filter(entrega => !idsVinculadosSet.has(entrega.id));
+
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useEntregasDisponiveis.ts:175',message:'Query entregas resultado final',data:{dataLength:data?.length||0,idsVinculadosLength:idsVinculados.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
 
       return data || [];
     },
@@ -179,13 +241,16 @@ export function useCreateAcertoViagem() {
     mutationFn: async (formData: AcertoViagemFormData) => {
       const { entregas_ids, ...acertoData } = formData;
 
+      // Sanitização de dados - converter strings vazias para null
+      const payload = {
+        ...acertoData,
+        motorista_id: acertoData.motorista_id || null,
+        data_chegada: acertoData.data_chegada || null,
+      };
+
       const { data: acerto, error: acertoError } = await supabase
         .from('acertos_viagem')
-        .insert({
-          ...acertoData,
-          motorista_id: acertoData.motorista_id || null,
-          montador_id: acertoData.montador_id || null,
-        })
+        .insert(payload)
         .select()
         .single();
 
@@ -206,18 +271,28 @@ export function useCreateAcertoViagem() {
 
       return acerto;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useCreateAcertoViagem.ts:210',message:'Criação sucesso',data:{acertoId:data?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
       queryClient.invalidateQueries({ queryKey: ['acertos_viagem'] });
       queryClient.invalidateQueries({ queryKey: ['entregas_disponiveis_acerto'] });
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useCreateAcertoViagem.ts:213',message:'Queries invalidadas',data:{timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
       toast({
         title: 'Sucesso!',
         description: 'Acerto de viagem criado com sucesso.',
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/1876b801-4017-4911-86b8-3f0fe2655b09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useCreateAcertoViagem.ts:218',message:'Erro ao criar',data:{errorMessage:error?.message,errorCode:error?.code,errorDetails:error},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+      console.error('Erro ao criar acerto:', error);
       toast({
-        title: 'Erro',
-        description: 'Não foi possível criar o acerto de viagem.',
+        title: 'Erro ao criar',
+        description: error.message || 'Verifique os dados e tente novamente.',
         variant: 'destructive',
       });
     },
@@ -232,13 +307,16 @@ export function useUpdateAcertoViagem() {
     mutationFn: async ({ id, formData }: { id: string; formData: AcertoViagemFormData }) => {
       const { entregas_ids, ...acertoData } = formData;
 
+      // Sanitização de dados - converter strings vazias para null
+      const payload = {
+        ...acertoData,
+        motorista_id: acertoData.motorista_id || null,
+        data_chegada: acertoData.data_chegada || null,
+      };
+
       const { error: acertoError } = await supabase
         .from('acertos_viagem')
-        .update({
-          ...acertoData,
-          motorista_id: acertoData.motorista_id || null,
-          montador_id: acertoData.montador_id || null,
-        })
+        .update(payload)
         .eq('id', id);
 
       if (acertoError) throw acertoError;
@@ -271,10 +349,11 @@ export function useUpdateAcertoViagem() {
         description: 'Acerto de viagem atualizado com sucesso.',
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Erro ao atualizar acerto:', error);
       toast({
-        title: 'Erro',
-        description: 'Não foi possível atualizar o acerto de viagem.',
+        title: 'Erro ao atualizar',
+        description: error.message || 'Verifique os dados e tente novamente.',
         variant: 'destructive',
       });
     },

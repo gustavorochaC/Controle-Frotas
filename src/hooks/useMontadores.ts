@@ -8,8 +8,9 @@ export function useMontadores(includeInactive = false) {
     queryKey: ['montadores', includeInactive],
     queryFn: async () => {
       let query = supabase
-        .from('montadores')
+        .from('motoristas')
         .select('*')
+        .eq('eh_montador', true)
         .order('nome', { ascending: true });
       
       if (!includeInactive) {
@@ -19,7 +20,14 @@ export function useMontadores(includeInactive = false) {
       const { data, error } = await query;
       
       if (error) throw error;
-      return data as Montador[];
+      // Mapear para o formato Montador esperado
+      return (data || []).map(m => ({
+        id: m.id,
+        nome: m.nome,
+        ativo: m.ativo,
+        created_at: m.created_at,
+        updated_at: m.updated_at,
+      })) as Montador[];
     }
   });
 }
@@ -30,16 +38,29 @@ export function useCreateMontador() {
   return useMutation({
     mutationFn: async (montador: MontadorFormData) => {
       const { data, error } = await supabase
-        .from('montadores')
-        .insert([montador])
+        .from('motoristas')
+        .insert([{
+          nome: montador.nome,
+          eh_montador: true,
+          eh_motorista: false,
+          ativo: montador.ativo ?? true,
+        }])
         .select()
         .single();
       
       if (error) throw error;
-      return data;
+      // Mapear para formato Montador
+      return {
+        id: data.id,
+        nome: data.nome,
+        ativo: data.ativo,
+        created_at: data.created_at,
+        updated_at: data.updated_at,
+      } as Montador;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['montadores'] });
+      queryClient.invalidateQueries({ queryKey: ['motoristas'] });
       toast({
         title: 'Sucesso!',
         description: 'Montador cadastrado com sucesso.',
@@ -61,17 +82,29 @@ export function useUpdateMontador() {
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<MontadorFormData> }) => {
       const { data: updatedData, error } = await supabase
-        .from('montadores')
-        .update(data)
+        .from('motoristas')
+        .update({
+          nome: data.nome,
+          ativo: data.ativo,
+        })
         .eq('id', id)
+        .eq('eh_montador', true)
         .select()
         .single();
       
       if (error) throw error;
-      return updatedData;
+      // Mapear para formato Montador
+      return {
+        id: updatedData.id,
+        nome: updatedData.nome,
+        ativo: updatedData.ativo,
+        created_at: updatedData.created_at,
+        updated_at: updatedData.updated_at,
+      } as Montador;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['montadores'] });
+      queryClient.invalidateQueries({ queryKey: ['motoristas'] });
       toast({
         title: 'Sucesso!',
         description: 'Montador atualizado com sucesso.',
@@ -93,17 +126,26 @@ export function useToggleMontadorAtivo() {
   return useMutation({
     mutationFn: async ({ id, ativo }: { id: string; ativo: boolean }) => {
       const { data, error } = await supabase
-        .from('montadores')
+        .from('motoristas')
         .update({ ativo })
         .eq('id', id)
+        .eq('eh_montador', true)
         .select()
         .single();
       
       if (error) throw error;
-      return data;
+      // Mapear para formato Montador
+      return {
+        id: data.id,
+        nome: data.nome,
+        ativo: data.ativo,
+        created_at: data.created_at,
+        updated_at: data.updated_at,
+      } as Montador;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['montadores'] });
+      queryClient.invalidateQueries({ queryKey: ['motoristas'] });
       toast({
         title: 'Sucesso!',
         description: data.ativo ? 'Montador reativado.' : 'Montador desativado.',
