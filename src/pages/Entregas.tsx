@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Plus, Printer } from 'lucide-react';
+import { Add as Plus, Print as Printer } from '@mui/icons-material';
 import { Button } from '@/components/ui/button';
 import { KPICards } from '@/components/dashboard/KPICards';
 import { EntregaTable } from '@/components/dashboard/EntregaTable';

@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from 'lucide-react';
+import { Edit as Pencil, Delete as Trash2 } from '@mui/icons-material';
 import { Button } from '@/components/ui/button';
 import {
   Table,

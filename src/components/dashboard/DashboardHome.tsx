@@ -1,21 +1,21 @@
 import { useState, useMemo } from 'react';
 import {
-    Truck,
-    Wrench,
-    DollarSign,
+    LocalShipping as Truck,
+    Build as Wrench,
+    AttachMoney as DollarSign,
     TrendingUp,
-    Fuel,
-    AlertTriangle,
-    CheckCircle2,
-    Clock,
-    ArrowRight,
-    Calendar,
-    Plus,
-    UserPlus,
-    CarFront,
-    Users,
-    Activity
-} from 'lucide-react';
+    LocalGasStation as Fuel,
+    WarningAmber as AlertTriangle,
+    CheckCircle as CheckCircle2,
+    AccessTime as Clock,
+    ArrowForward as ArrowRight,
+    CalendarToday as Calendar,
+    Add as Plus,
+    PersonAdd as UserPlus,
+    DirectionsCar as CarFront,
+    People as Users,
+    Timeline as Activity
+} from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {

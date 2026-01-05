@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, Wrench, DollarSign, Car, Calendar, Printer } from 'lucide-react';
+import { Add as Plus, Build as Wrench, AttachMoney as DollarSign, DirectionsCar as Car, CalendarToday as Calendar, Print as Printer } from '@mui/icons-material';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ManutencaoTable } from '@/components/manutencao/ManutencaoTable';

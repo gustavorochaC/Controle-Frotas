@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Car, XCircle } from 'lucide-react';
+import { Add as Plus, DirectionsCar as Car, Cancel as XCircle } from '@mui/icons-material';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {

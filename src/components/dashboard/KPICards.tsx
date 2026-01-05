@@ -1,4 +1,4 @@
-import { Package, DollarSign, Wrench, TrendingUp } from 'lucide-react';
+import { Inventory2 as Package, AttachMoney as DollarSign, Build as Wrench, TrendingUp } from '@mui/icons-material';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Entrega } from '@/types/entrega';
 

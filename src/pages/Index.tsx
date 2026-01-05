@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Truck, Settings, Fuel } from 'lucide-react';
+import { Add as Plus, LocalShipping as Truck, Settings, LocalGasStation as Fuel } from '@mui/icons-material';
 import { Button } from '@/components/ui/button';
 import { KPICards } from '@/components/dashboard/KPICards';
 import { EntregaFilters } from '@/components/dashboard/EntregaFilters';

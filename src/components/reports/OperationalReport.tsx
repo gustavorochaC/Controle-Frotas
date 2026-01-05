@@ -1,4 +1,4 @@
-import { Package, MapPin } from 'lucide-react';
+import { Inventory2 as Package, LocationOn as MapPin } from '@mui/icons-material';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Table,

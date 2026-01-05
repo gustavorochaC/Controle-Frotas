@@ -1,4 +1,4 @@
-import { GripVertical } from "lucide-react";
+import { DragIndicator as GripVertical } from "@mui/icons-material";
 import * as ResizablePrimitive from "react-resizable-panels";
 
 import { cn } from "@/lib/utils";

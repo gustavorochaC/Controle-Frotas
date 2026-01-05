@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Download } from 'lucide-react';
+import { Download } from '@mui/icons-material';
 import { ModuleLayout } from '@/components/layout/ModuleLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

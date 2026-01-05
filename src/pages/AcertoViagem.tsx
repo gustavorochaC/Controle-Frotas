@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Plus, Search, FileText, Printer } from 'lucide-react';
+import { Add as Plus, Search, Description as FileText, Print as Printer } from '@mui/icons-material';
 import { ModuleLayout } from '@/components/layout/ModuleLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

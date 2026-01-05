@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Wrench, UserX, UserCheck } from 'lucide-react';
+import { Add as Plus, Build as Wrench, PersonRemove as UserX, PersonAdd as UserCheck } from '@mui/icons-material';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {

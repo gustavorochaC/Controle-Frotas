@@ -32,7 +32,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Search } from 'lucide-react';
+import { Search } from '@mui/icons-material';
 import { useVeiculos } from '@/hooks/useVeiculos';
 import { useMotoristas } from '@/hooks/useMotoristas';
 import { 

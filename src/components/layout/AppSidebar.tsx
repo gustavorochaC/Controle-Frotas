@@ -1,21 +1,21 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-  Truck,
-  Fuel,
-  Wrench,
-  LayoutDashboard,
-  Wallet,
-  Users,
-  Upload,
-  FileBarChart,
-  LifeBuoy,
-  LogOut,
+  LocalShipping as Truck,
+  LocalGasStation as Fuel,
+  Build as Wrench,
+  Dashboard as LayoutDashboard,
+  AccountBalanceWallet as Wallet,
+  People as Users,
+  CloudUpload as Upload,
+  Assessment as FileBarChart,
+  Help as LifeBuoy,
+  Logout as LogOut,
   ChevronLeft,
   ChevronRight,
-  Sun,
-  Moon
-} from 'lucide-react';
+  LightMode as Sun,
+  DarkMode as Moon
+} from '@mui/icons-material';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,

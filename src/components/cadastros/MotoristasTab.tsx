@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, UserCheck, UserX, AlertTriangle, Filter } from 'lucide-react';
+import { Add as Plus, PersonAdd as UserCheck, PersonRemove as UserX, WarningAmber as AlertTriangle, FilterList as Filter } from '@mui/icons-material';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {

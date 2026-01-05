@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, Gauge, Printer, FileText, Droplet, DollarSign } from 'lucide-react';
+import { Add as Plus, Speed as Gauge, Print as Printer, Description as FileText, WaterDrop as Droplet, AttachMoney as DollarSign } from '@mui/icons-material';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AbastecimentoTable } from '@/components/abastecimento/AbastecimentoTable';

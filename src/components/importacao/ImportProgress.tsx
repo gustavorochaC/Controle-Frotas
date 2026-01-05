@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react';
+import { Loop as Loader2 } from '@mui/icons-material';
 import { Progress } from '@/components/ui/progress';
 import { ImportProgress as ImportProgressType } from '@/utils/importacao/importer';
 

@@ -9,6 +9,7 @@
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
   [![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
   [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+  [![Material UI](https://img.shields.io/badge/Material%20UI-007FFF?style=for-the-badge&logo=mui&logoColor=white)](https://mui.com/)
   [![Supabase](https://img.shields.io/badge/Supabase-Backend-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 </div>
 
@@ -94,12 +95,13 @@ O **SCV (Sistema de Controle de Veículos)** é uma aplicação web completa des
 - Interface em abas para organização
 
 ### 📥 Importação em Massa
-- Sistema completo de importação de dados via Excel/CSV
+- Sistema unificado e inteligente de importação de dados via Excel/CSV
+- Processamento automático com feedback visual detalhado
 - Tipos de importação suportados:
   - Veículos
   - Entregas
-  - Abastecimentos
-  - Manutenções
+  - Abastecimentos (Novo importador unificado)
+  - Manutenções (Novo importador unificado)
   - Motoristas
   - Montadores
 - Validação automática de dados antes da importação
@@ -122,7 +124,7 @@ O **SCV (Sistema de Controle de Veículos)** é uma aplicação web completa des
 | **Zod** | Validação de schemas |
 | **TanStack Query** | Gerenciamento de estado do servidor |
 | **Supabase** | Backend as a Service (PostgreSQL + Auth) |
-| **Lucide React** | Biblioteca de ícones |
+| **Material UI** | Biblioteca de componentes e ícones (@mui/material) |
 | **date-fns** | Manipulação de datas |
 
 ## 🚀 Como Executar

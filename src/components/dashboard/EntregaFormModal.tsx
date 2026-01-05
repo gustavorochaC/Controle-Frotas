@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { CalendarIcon, X, Plus } from 'lucide-react';
+import { CalendarMonth as CalendarIcon, Close as X, Add as Plus } from '@mui/icons-material';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,

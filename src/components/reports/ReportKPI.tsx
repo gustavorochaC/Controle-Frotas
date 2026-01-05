@@ -1,11 +1,10 @@
-import { LucideIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 interface ReportKPIProps {
     title: string;
     value: string | number;
-    icon: LucideIcon;
+    icon: React.ElementType;
     variant?: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'purple' | 'orange';
     subtext?: string;
     trend?: {

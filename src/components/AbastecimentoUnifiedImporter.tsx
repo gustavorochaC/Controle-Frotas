@@ -4,7 +4,7 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
-import { AlertTriangle, CheckCircle2, Upload, FileSpreadsheet, X, Loader2 } from 'lucide-react';
+import { WarningAmber as AlertTriangle, CheckCircle as CheckCircle2, CloudUpload as Upload, TableChart as FileSpreadsheet, Close as X, Loop as Loader2 } from '@mui/icons-material';
 import { Button } from '@/components/ui/button';
 import {
     Table,

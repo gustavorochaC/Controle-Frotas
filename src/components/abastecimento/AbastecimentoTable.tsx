@@ -1,4 +1,4 @@
-import { Pencil, Trash2, Gauge, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Edit as Pencil, Delete as Trash2, Speed as Gauge, WarningAmber as AlertTriangle, CheckCircle as CheckCircle2 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

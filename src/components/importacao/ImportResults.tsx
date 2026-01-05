@@ -1,4 +1,4 @@
-import { CheckCircle2, AlertTriangle, Info, RotateCcw } from 'lucide-react';
+import { CheckCircle as CheckCircle2, WarningAmber as AlertTriangle, Info, RotateLeft as RotateCcw } from '@mui/icons-material';
 import { Button } from '@/components/ui/button';
 import { ImportResult } from '@/utils/importacao/importer';
 

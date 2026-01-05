@@ -1,6 +1,6 @@
 import * as React from "react";
 import { OTPInput, OTPInputContext } from "input-otp";
-import { Dot } from "lucide-react";
+import { FiberManualRecord as Dot } from "@mui/icons-material";
 
 import { cn } from "@/lib/utils";
 

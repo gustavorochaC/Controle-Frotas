@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Edit, Trash2, Printer, Eye, MoreHorizontal } from 'lucide-react';
+import { Edit, Delete as Trash2, Print as Printer, Visibility as Eye, MoreHoriz as MoreHorizontal } from '@mui/icons-material';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Manutencao, STATUS_MANUTENCAO_LABELS, TIPO_MANUTENCAO_LABELS } from '@/types/manutencao';
 import { cn } from '@/lib/utils';
-import { AlertTriangle, CheckCircle2, Pencil, Trash2 } from 'lucide-react';
+import { WarningAmber as AlertTriangle, CheckCircle as CheckCircle2, Edit as Pencil, Delete as Trash2 } from '@mui/icons-material';
 import {
   Tooltip,
   TooltipContent,

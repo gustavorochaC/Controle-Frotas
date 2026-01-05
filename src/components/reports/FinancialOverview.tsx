@@ -1,4 +1,4 @@
-import { DollarSign, Wrench, ArrowUpDown, BarChart3, TrendingUp, TrendingDown } from 'lucide-react';
+import { AttachMoney as DollarSign, Build as Wrench, SwapVert as ArrowUpDown, BarChart as BarChart3, TrendingUp, TrendingDown } from '@mui/icons-material';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ReportKPI } from './ReportKPI';
 import { Badge } from '@/components/ui/badge';

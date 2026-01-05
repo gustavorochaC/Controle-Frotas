@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { AlertTriangle, AlertCircle, Info, CheckCircle2, Filter, Download } from 'lucide-react';
+import { WarningAmber as AlertTriangle, ErrorOutline as AlertCircle, Info, CheckCircle as CheckCircle2, FilterList as Filter, Download } from '@mui/icons-material';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
